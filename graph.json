@@ -1,0 +1,640 @@
+{
+  "version": 1,
+  "organisation": "jlbalmerjr1",
+  "project": "ClaudeTesting",
+  "generatedBy": "Get-AzDoPipelineDependencyGraph",
+  "nodes": [
+    {
+      "id": "pipeline:p01-simple-include",
+      "kind": "pipeline",
+      "name": "p01-simple-include"
+    },
+    {
+      "id": "pipeline:p02-nested-chain",
+      "kind": "pipeline",
+      "name": "p02-nested-chain"
+    },
+    {
+      "id": "pipeline:p03-extends-params",
+      "kind": "pipeline",
+      "name": "p03-extends-params"
+    },
+    {
+      "id": "pipeline:p04-cross-repo-template",
+      "kind": "pipeline",
+      "name": "p04-cross-repo-template"
+    },
+    {
+      "id": "pipeline:p05-pipeline-resource",
+      "kind": "pipeline",
+      "name": "p05-pipeline-resource"
+    },
+    {
+      "id": "pipeline:p06-variable-template",
+      "kind": "pipeline",
+      "name": "p06-variable-template"
+    },
+    {
+      "id": "pipeline:p07-diamond-a",
+      "kind": "pipeline",
+      "name": "p07-diamond-a"
+    },
+    {
+      "id": "pipeline:p07-diamond-b",
+      "kind": "pipeline",
+      "name": "p07-diamond-b"
+    },
+    {
+      "id": "pipeline:p08-cycle",
+      "kind": "pipeline",
+      "name": "p08-cycle"
+    },
+    {
+      "id": "pipeline:p09-unresolved",
+      "kind": "pipeline",
+      "name": "p09-unresolved"
+    },
+    {
+      "id": "pipeline:p10-orphan",
+      "kind": "pipeline",
+      "name": "p10-orphan"
+    },
+    {
+      "id": "pipeline:x01-consumer-build",
+      "kind": "pipeline",
+      "name": "x01-consumer-build"
+    },
+    {
+      "id": "pipeline:x02-platform-release",
+      "kind": "pipeline",
+      "name": "x02-platform-release"
+    },
+    {
+      "id": "pipeline:x03-shared-nightly",
+      "kind": "pipeline",
+      "name": "x03-shared-nightly"
+    },
+    {
+      "id": "pipeline:x04-cross-trigger",
+      "kind": "pipeline",
+      "name": "x04-cross-trigger"
+    },
+    {
+      "id": "repo:ClaudeTesting",
+      "kind": "repo",
+      "name": "ClaudeTesting"
+    },
+    {
+      "id": "repo:consumer-app",
+      "kind": "repo",
+      "name": "consumer-app"
+    },
+    {
+      "id": "repo:pipelines-main",
+      "kind": "repo",
+      "name": "pipelines-main"
+    },
+    {
+      "id": "repo:templates-platform",
+      "kind": "repo",
+      "name": "templates-platform"
+    },
+    {
+      "id": "repo:templates-shared",
+      "kind": "repo",
+      "name": "templates-shared"
+    },
+    {
+      "id": "yaml:consumer-app/azure-pipelines.yml",
+      "kind": "yaml",
+      "name": "azure-pipelines.yml",
+      "repo": "consumer-app",
+      "path": "repos/consumer-app/azure-pipelines.yml"
+    },
+    {
+      "id": "yaml:consumer-app/pipelines/release.yml",
+      "kind": "yaml",
+      "name": "pipelines/release.yml",
+      "repo": "consumer-app",
+      "path": "repos/consumer-app/pipelines/release.yml"
+    },
+    {
+      "id": "yaml:consumer-app/templates/app-steps.yml",
+      "kind": "yaml",
+      "name": "templates/app-steps.yml",
+      "repo": "consumer-app",
+      "path": "repos/consumer-app/templates/app-steps.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p01.yml",
+      "kind": "yaml",
+      "name": "pipelines/p01.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p01.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p02.yml",
+      "kind": "yaml",
+      "name": "pipelines/p02.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p02.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p03.yml",
+      "kind": "yaml",
+      "name": "pipelines/p03.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p03.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p04.yml",
+      "kind": "yaml",
+      "name": "pipelines/p04.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p04.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p05.yml",
+      "kind": "yaml",
+      "name": "pipelines/p05.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p05.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p06.yml",
+      "kind": "yaml",
+      "name": "pipelines/p06.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p06.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p07a.yml",
+      "kind": "yaml",
+      "name": "pipelines/p07a.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p07a.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p07b.yml",
+      "kind": "yaml",
+      "name": "pipelines/p07b.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p07b.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p08.yml",
+      "kind": "yaml",
+      "name": "pipelines/p08.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p08.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p09.yml",
+      "kind": "yaml",
+      "name": "pipelines/p09.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p09.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/p10.yml",
+      "kind": "yaml",
+      "name": "pipelines/p10.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/p10.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/chain-a.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/chain-a.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/chain-a.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/chain-b.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/chain-b.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/chain-b.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/chain-c.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/chain-c.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/chain-c.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/cycle-a.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/cycle-a.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/cycle-a.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/cycle-b.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/cycle-b.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/cycle-b.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/diamond-leaf.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/diamond-leaf.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/diamond-leaf.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/diamond-shared.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/diamond-shared.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/diamond-shared.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/steps-build.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/steps-build.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/steps-build.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/pipelines/templates/vars-common.yml",
+      "kind": "yaml",
+      "name": "pipelines/templates/vars-common.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/pipelines/templates/vars-common.yml"
+    },
+    {
+      "id": "yaml:pipelines-main/templates/steps-build.yml",
+      "kind": "yaml",
+      "name": "templates/steps-build.yml",
+      "repo": "pipelines-main",
+      "path": "repos/pipelines-main/templates/steps-build.yml"
+    },
+    {
+      "id": "yaml:templates-platform/jobs/release.yml",
+      "kind": "yaml",
+      "name": "jobs/release.yml",
+      "repo": "templates-platform",
+      "path": "repos/templates-platform/jobs/release.yml"
+    },
+    {
+      "id": "yaml:templates-platform/pipelines/trigger.yml",
+      "kind": "yaml",
+      "name": "pipelines/trigger.yml",
+      "repo": "templates-platform",
+      "path": "repos/templates-platform/pipelines/trigger.yml"
+    },
+    {
+      "id": "yaml:templates-platform/steps/deploy.yml",
+      "kind": "yaml",
+      "name": "steps/deploy.yml",
+      "repo": "templates-platform",
+      "path": "repos/templates-platform/steps/deploy.yml"
+    },
+    {
+      "id": "yaml:templates-shared/pipelines/nightly.yml",
+      "kind": "yaml",
+      "name": "pipelines/nightly.yml",
+      "repo": "templates-shared",
+      "path": "repos/templates-shared/pipelines/nightly.yml"
+    },
+    {
+      "id": "yaml:templates-shared/steps/common.yml",
+      "kind": "yaml",
+      "name": "steps/common.yml",
+      "repo": "templates-shared",
+      "path": "repos/templates-shared/steps/common.yml"
+    },
+    {
+      "id": "yaml:templates-shared/steps/notify.yml",
+      "kind": "yaml",
+      "name": "steps/notify.yml",
+      "repo": "templates-shared",
+      "path": "repos/templates-shared/steps/notify.yml"
+    }
+  ],
+  "edges": [
+    {
+      "from": "pipeline:p01-simple-include",
+      "to": "yaml:pipelines-main/pipelines/p01.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p02-nested-chain",
+      "to": "yaml:pipelines-main/pipelines/p02.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p03-extends-params",
+      "to": "yaml:pipelines-main/pipelines/p03.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p04-cross-repo-template",
+      "to": "yaml:pipelines-main/pipelines/p04.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p05-pipeline-resource",
+      "to": "yaml:pipelines-main/pipelines/p05.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p06-variable-template",
+      "to": "yaml:pipelines-main/pipelines/p06.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p07-diamond-a",
+      "to": "yaml:pipelines-main/pipelines/p07a.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p07-diamond-b",
+      "to": "yaml:pipelines-main/pipelines/p07b.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p08-cycle",
+      "to": "yaml:pipelines-main/pipelines/p08.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p09-unresolved",
+      "to": "yaml:pipelines-main/pipelines/p09.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:p10-orphan",
+      "to": "yaml:pipelines-main/pipelines/p10.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:x01-consumer-build",
+      "to": "yaml:consumer-app/azure-pipelines.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:x02-platform-release",
+      "to": "yaml:consumer-app/pipelines/release.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:x03-shared-nightly",
+      "to": "yaml:templates-shared/pipelines/nightly.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "pipeline:x04-cross-trigger",
+      "to": "yaml:templates-platform/pipelines/trigger.yml",
+      "kind": "definition"
+    },
+    {
+      "from": "yaml:consumer-app/azure-pipelines.yml",
+      "to": "repo:consumer-app",
+      "kind": "checkout",
+      "ref": "self"
+    },
+    {
+      "from": "yaml:consumer-app/azure-pipelines.yml",
+      "to": "repo:templates-shared",
+      "kind": "checkout",
+      "ref": "sharedTemplates",
+      "alias": "sharedTemplates"
+    },
+    {
+      "from": "yaml:consumer-app/azure-pipelines.yml",
+      "to": "repo:pipelines-main",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/pipelines-main",
+      "alias": "mainPipelines"
+    },
+    {
+      "from": "yaml:consumer-app/azure-pipelines.yml",
+      "to": "repo:templates-shared",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/templates-shared",
+      "alias": "sharedTemplates"
+    },
+    {
+      "from": "yaml:consumer-app/azure-pipelines.yml",
+      "to": "yaml:consumer-app/templates/app-steps.yml",
+      "kind": "template",
+      "ref": "templates/app-steps.yml"
+    },
+    {
+      "from": "yaml:consumer-app/azure-pipelines.yml",
+      "to": "yaml:pipelines-main/templates/steps-build.yml",
+      "kind": "template",
+      "ref": "templates/steps-build.yml@mainPipelines",
+      "alias": "mainPipelines"
+    },
+    {
+      "from": "yaml:consumer-app/pipelines/release.yml",
+      "to": "pipeline:x01-consumer-build",
+      "kind": "pipelineResource",
+      "ref": "x01-consumer-build",
+      "alias": "appBuild"
+    },
+    {
+      "from": "yaml:consumer-app/pipelines/release.yml",
+      "to": "repo:templates-platform",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/templates-platform",
+      "alias": "platformTemplates"
+    },
+    {
+      "from": "yaml:consumer-app/pipelines/release.yml",
+      "to": "yaml:templates-platform/jobs/release.yml",
+      "kind": "template",
+      "ref": "jobs/release.yml@platformTemplates",
+      "alias": "platformTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p01.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/steps-build.yml",
+      "kind": "template",
+      "ref": "templates/steps-build.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p02.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/chain-a.yml",
+      "kind": "template",
+      "ref": "templates/chain-a.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p03.yml",
+      "to": "yaml:templates-platform/jobs/release.yml",
+      "kind": "extends",
+      "ref": "jobs/release.yml@platformTemplates",
+      "alias": "platformTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p03.yml",
+      "to": "repo:templates-platform",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/templates-platform",
+      "alias": "platformTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p04.yml",
+      "to": "repo:templates-platform",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/templates-platform",
+      "alias": "platformTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p04.yml",
+      "to": "repo:templates-shared",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/templates-shared",
+      "alias": "sharedTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p04.yml",
+      "to": "yaml:templates-shared/steps/common.yml",
+      "kind": "template",
+      "ref": "steps/common.yml@sharedTemplates",
+      "alias": "sharedTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p04.yml",
+      "to": "yaml:templates-platform/steps/deploy.yml",
+      "kind": "template",
+      "ref": "steps/deploy.yml@platformTemplates",
+      "alias": "platformTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p05.yml",
+      "to": "pipeline:p01-simple-include",
+      "kind": "pipelineResource",
+      "ref": "p01-simple-include",
+      "alias": "upstreamBuild"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p05.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/chain-c.yml",
+      "kind": "template",
+      "ref": "templates/chain-c.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p06.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/vars-common.yml",
+      "kind": "template",
+      "ref": "templates/vars-common.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p07a.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/diamond-shared.yml",
+      "kind": "template",
+      "ref": "templates/diamond-shared.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p07b.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/diamond-shared.yml",
+      "kind": "template",
+      "ref": "templates/diamond-shared.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p08.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/cycle-a.yml",
+      "kind": "template",
+      "ref": "templates/cycle-a.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p09.yml",
+      "to": "repo:templates-shared",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/templates-shared",
+      "alias": "sharedTemplates"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p09.yml",
+      "to": "unresolved:steps/common.yml@ghostTemplates",
+      "kind": "unresolved",
+      "ref": "steps/common.yml@ghostTemplates",
+      "refKind": "template",
+      "alias": "ghostTemplates",
+      "reason": "alias 'ghostTemplates' is not declared in resources.repositories"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/p09.yml",
+      "to": "unresolved:templates/missing-steps.yml",
+      "kind": "unresolved",
+      "ref": "templates/missing-steps.yml",
+      "refKind": "template",
+      "reason": "file 'pipelines/templates/missing-steps.yml' does not exist in repository 'pipelines-main'"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/templates/chain-a.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/chain-b.yml",
+      "kind": "template",
+      "ref": "chain-b.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/templates/chain-b.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/chain-c.yml",
+      "kind": "template",
+      "ref": "chain-c.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/templates/cycle-a.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/cycle-b.yml",
+      "kind": "template",
+      "ref": "cycle-b.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/templates/cycle-b.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/cycle-a.yml",
+      "kind": "template",
+      "ref": "cycle-a.yml"
+    },
+    {
+      "from": "yaml:pipelines-main/pipelines/templates/diamond-shared.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/diamond-leaf.yml",
+      "kind": "template",
+      "ref": "diamond-leaf.yml"
+    },
+    {
+      "from": "yaml:templates-platform/pipelines/trigger.yml",
+      "to": "pipeline:p01-simple-include",
+      "kind": "pipelineResource",
+      "ref": "p01-simple-include",
+      "alias": "mainSimple"
+    },
+    {
+      "from": "yaml:templates-platform/pipelines/trigger.yml",
+      "to": "yaml:templates-platform/steps/deploy.yml",
+      "kind": "template",
+      "ref": "../steps/deploy.yml"
+    },
+    {
+      "from": "yaml:templates-shared/pipelines/nightly.yml",
+      "to": "repo:pipelines-main",
+      "kind": "repositoryResource",
+      "ref": "ClaudeTesting/pipelines-main",
+      "alias": "mainPipelines"
+    },
+    {
+      "from": "yaml:templates-shared/pipelines/nightly.yml",
+      "to": "yaml:templates-shared/steps/common.yml",
+      "kind": "template",
+      "ref": "../steps/common.yml"
+    },
+    {
+      "from": "yaml:templates-shared/pipelines/nightly.yml",
+      "to": "yaml:pipelines-main/templates/steps-build.yml",
+      "kind": "template",
+      "ref": "templates/steps-build.yml@mainPipelines",
+      "alias": "mainPipelines"
+    },
+    {
+      "from": "yaml:templates-shared/steps/common.yml",
+      "to": "yaml:templates-shared/steps/notify.yml",
+      "kind": "template",
+      "ref": "notify.yml"
+    }
+  ]
+}
