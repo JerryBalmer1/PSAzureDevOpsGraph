@@ -1,0 +1,15 @@
+# Line endings are load-bearing.
+#
+# core.autocrlf=true is the Git for Windows installer default and arrives at
+# system scope on every Windows clone, so a checkout translates LF to CRLF
+# unless told otherwise. These rules override it per path rather than asking
+# each clone to reconfigure. They match the rules in the repository that seeds
+# this one, deliberately: a run that produced different bytes from the same
+# source because of where it was checked out would not be comparable.
+
+* text=auto
+
+*.yml  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.ps1  text eol=lf
