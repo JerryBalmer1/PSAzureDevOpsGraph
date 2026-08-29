@@ -1,0 +1,51 @@
+TOPIC
+    about_PSAzureDevOpsGraph
+
+SHORT DESCRIPTION
+    Produces a dependency graph of Azure DevOps pipelines and the repositories
+    and templates they reference.
+
+LONG DESCRIPTION
+    Azure DevOps pipeline YAML composes by reference. A pipeline pulls in
+    templates, templates pull in other templates, and those references cross
+    repository boundaries. None of it is visible from any one file.
+
+    PSAzureDevOpsGraph answers the question that follows: if I change this
+    template, which pipelines break?
+
+    The module is READ-ONLY, permanently. It never queues, runs, or triggers a
+    pipeline, and it never creates, updates, or deletes anything in Azure
+    DevOps. There is no -Force that changes this and no command whose name
+    begins with a writing verb.
+
+CREDENTIALS
+    A personal access token is read from the environment variable AZDO_PAT and
+    from nowhere else. It is never a parameter and never read from a file: a
+    value passed as a parameter ends up in PSReadLine history, in
+    Start-Transcript output, and in ScriptBlock logging, and it is a bearer
+    credential for an entire organisation.
+
+    If AZDO_PAT is absent, commands fail with a message naming the variable.
+    They do not prompt and do not fall back to anything.
+
+    The token needs Code (Read) and Build (Read) scope.
+
+COMMANDS
+    Get-AzDoRepository                  The Git repositories in a project.
+    Get-AzDoPipeline                    The pipeline definitions, each with the
+                                        repository and path its YAML lives at.
+    Get-AzDoPipelineYaml                The YAML text at a path, or $null.
+    Get-AzDoPipelineReference           The references in one document. Parsing
+                                        only - no resolution, no network.
+    Resolve-AzDoPipelineReference       One reference to a repository and path,
+                                        or an unresolved result with a reason.
+    Get-AzDoPipelineDependencyGraph     The graph: nodes and edges.
+    Export-AzDoPipelineDependencyGraph  The graph as JSON, DOT or HTML.
+
+EXAMPLES
+    $graph = Get-AzDoPipelineDependencyGraph -Organisation contoso -Project Payments
+    $graph | Export-AzDoPipelineDependencyGraph -Path ./graph.json
+    $graph.edges | Where-Object kind -eq 'unresolved'
+
+SEE ALSO
+    https://github.com/JerryBalmer1/PSAzureDevOpsGraph
