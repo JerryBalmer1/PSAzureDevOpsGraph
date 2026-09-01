@@ -37,7 +37,14 @@ function Add-AzDoGraphEdge {
     }
     if ($Reference)                                  { $record['ref'] = $Reference }
     if ($Kind -eq 'unresolved' -and $ReferenceKind)  { $record['refKind'] = $ReferenceKind }
-    if ($Alias)                                      { $record['alias'] = $Alias }
+    # alias is written only where it is a fact the ref does NOT already carry:
+    # a resources entry declares a local handle that differs from the thing it
+    # names, so both are worth saying. On a template or extends edge the alias
+    # is a suffix of ref, and on a checkout edge the ref IS the alias; writing
+    # it again there says nothing and costs one difference per edge.
+    if ($Alias -and $Kind -in 'pipelineResource', 'repositoryResource') {
+        $record['alias'] = $Alias
+    }
     if ($Reason)                                     { $record['reason'] = $Reason }
 
     $key = ($record.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join '|'

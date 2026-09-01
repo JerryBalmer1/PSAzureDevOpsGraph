@@ -27,10 +27,15 @@ function Add-AzDoGraphNode {
         kind = $Kind
         name = $Name
     }
-    # repo and path are required on a yaml node and are nothing to say on the
-    # others, where the id and name already carry the same fact.
-    if ($Kind -eq 'yaml') {
+    # A pipeline and a yaml node both live somewhere, and which repository that
+    # is cannot be read off the id of a pipeline node - only off its definition
+    # edge, which is a different record. It is a positive fact about the node,
+    # so it is written. A repo node's own name already is the repository, so
+    # repeating it there would state nothing.
+    if ($Kind -in 'yaml', 'pipeline') {
         $record['repo'] = $Repository
+    }
+    if ($Kind -eq 'yaml') {
         $record['path'] = $Path
     }
     $Node[$Id] = [pscustomobject] $record

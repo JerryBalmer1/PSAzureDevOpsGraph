@@ -7,77 +7,97 @@
     {
       "id": "pipeline:p01-simple-include",
       "kind": "pipeline",
-      "name": "p01-simple-include"
+      "name": "p01-simple-include",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p02-nested-chain",
       "kind": "pipeline",
-      "name": "p02-nested-chain"
+      "name": "p02-nested-chain",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p03-extends-params",
       "kind": "pipeline",
-      "name": "p03-extends-params"
+      "name": "p03-extends-params",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p04-cross-repo-template",
       "kind": "pipeline",
-      "name": "p04-cross-repo-template"
+      "name": "p04-cross-repo-template",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p05-pipeline-resource",
       "kind": "pipeline",
-      "name": "p05-pipeline-resource"
+      "name": "p05-pipeline-resource",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p06-variable-template",
       "kind": "pipeline",
-      "name": "p06-variable-template"
+      "name": "p06-variable-template",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p07-diamond-a",
       "kind": "pipeline",
-      "name": "p07-diamond-a"
+      "name": "p07-diamond-a",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p07-diamond-b",
       "kind": "pipeline",
-      "name": "p07-diamond-b"
+      "name": "p07-diamond-b",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p08-cycle",
       "kind": "pipeline",
-      "name": "p08-cycle"
+      "name": "p08-cycle",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p09-unresolved",
       "kind": "pipeline",
-      "name": "p09-unresolved"
+      "name": "p09-unresolved",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:p10-orphan",
       "kind": "pipeline",
-      "name": "p10-orphan"
+      "name": "p10-orphan",
+      "repo": "pipelines-main"
     },
     {
       "id": "pipeline:x01-consumer-build",
       "kind": "pipeline",
-      "name": "x01-consumer-build"
+      "name": "x01-consumer-build",
+      "repo": "consumer-app"
     },
     {
       "id": "pipeline:x02-platform-release",
       "kind": "pipeline",
-      "name": "x02-platform-release"
+      "name": "x02-platform-release",
+      "repo": "consumer-app"
     },
     {
       "id": "pipeline:x03-shared-nightly",
       "kind": "pipeline",
-      "name": "x03-shared-nightly"
+      "name": "x03-shared-nightly",
+      "repo": "templates-shared"
     },
     {
       "id": "pipeline:x04-cross-trigger",
       "kind": "pipeline",
-      "name": "x04-cross-trigger"
+      "name": "x04-cross-trigger",
+      "repo": "templates-platform"
+    },
+    {
+      "id": "repo:consumer-app",
+      "kind": "repo",
+      "name": "consumer-app"
     },
     {
       "id": "repo:pipelines-main",
@@ -392,8 +412,7 @@
       "from": "yaml:consumer-app/azure-pipelines.yml",
       "to": "repo:templates-shared",
       "kind": "checkout",
-      "ref": "sharedTemplates",
-      "alias": "sharedTemplates"
+      "ref": "sharedTemplates"
     },
     {
       "from": "yaml:consumer-app/azure-pipelines.yml",
@@ -412,8 +431,7 @@
       "from": "yaml:consumer-app/azure-pipelines.yml",
       "to": "yaml:pipelines-main/templates/steps-build.yml",
       "kind": "template",
-      "ref": "templates/steps-build.yml@mainPipelines",
-      "alias": "mainPipelines"
+      "ref": "templates/steps-build.yml@mainPipelines"
     },
     {
       "from": "yaml:consumer-app/pipelines/release.yml",
@@ -433,8 +451,7 @@
       "from": "yaml:consumer-app/pipelines/release.yml",
       "to": "yaml:templates-platform/jobs/release.yml",
       "kind": "template",
-      "ref": "jobs/release.yml@platformTemplates",
-      "alias": "platformTemplates"
+      "ref": "jobs/release.yml@platformTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p01.yml",
@@ -459,8 +476,7 @@
       "from": "yaml:pipelines-main/pipelines/p03.yml",
       "to": "yaml:templates-platform/jobs/release.yml",
       "kind": "extends",
-      "ref": "jobs/release.yml@platformTemplates",
-      "alias": "platformTemplates"
+      "ref": "jobs/release.yml@platformTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p04.yml",
@@ -480,15 +496,13 @@
       "from": "yaml:pipelines-main/pipelines/p04.yml",
       "to": "yaml:templates-platform/steps/deploy.yml",
       "kind": "template",
-      "ref": "steps/deploy.yml@platformTemplates",
-      "alias": "platformTemplates"
+      "ref": "steps/deploy.yml@platformTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p04.yml",
       "to": "yaml:templates-shared/steps/common.yml",
       "kind": "template",
-      "ref": "steps/common.yml@sharedTemplates",
-      "alias": "sharedTemplates"
+      "ref": "steps/common.yml@sharedTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p05.yml",
@@ -540,8 +554,7 @@
       "kind": "unresolved",
       "ref": "steps/common.yml@ghostTemplates",
       "refKind": "template",
-      "alias": "ghostTemplates",
-      "reason": "alias-not-declared"
+      "reason": "alias-not-declared: 'ghostTemplates' is not in resources.repositories of pipelines/p09.yml, so the repository is unknown and the path cannot be resolved at all"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p09.yml",
@@ -549,7 +562,7 @@
       "kind": "unresolved",
       "ref": "templates/missing-steps.yml",
       "refKind": "template",
-      "reason": "file-not-found"
+      "reason": "file-not-found: resolved to pipelines/templates/missing-steps.yml in pipelines-main, which does not exist"
     },
     {
       "from": "yaml:pipelines-main/pipelines/templates/chain-a.yml",
@@ -605,8 +618,7 @@
       "from": "yaml:templates-shared/pipelines/nightly.yml",
       "to": "yaml:pipelines-main/templates/steps-build.yml",
       "kind": "template",
-      "ref": "templates/steps-build.yml@mainPipelines",
-      "alias": "mainPipelines"
+      "ref": "templates/steps-build.yml@mainPipelines"
     },
     {
       "from": "yaml:templates-shared/pipelines/nightly.yml",

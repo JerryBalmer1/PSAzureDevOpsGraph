@@ -171,9 +171,17 @@ Describe 'Get-AzDoPipelineDependencyGraph' {
             $script:NodeIds | Should-NotContainCollection 'repo:unused'
         }
 
-        It 'does not emit a node for the repository a pipeline merely lives in' {
-            # app is never named by resources.repositories or checkout.
-            $script:NodeIds | Should-NotContainCollection 'repo:app'
+        It 'emits a node for a repository the graph lives in, referenced or not' {
+            # Nothing names app in resources.repositories or checkout, but two
+            # pipelines and five YAML files are in it, so it is part of what
+            # these pipelines depend on.
+            $script:NodeIds | Should-ContainCollection 'repo:app'
+        }
+
+        It 'gives every pipeline node the repository it lives in' {
+            foreach ($node in $script:Graph.nodes | Where-Object kind -eq 'pipeline') {
+                $node.repo | Should-NotBeNull
+            }
         }
 
         It 'emits repository nodes for the ones references name' {
@@ -207,14 +215,14 @@ Describe 'Get-AzDoPipelineDependencyGraph' {
         }
 
         It 'reports an undeclared alias as alias-not-declared, keeping the alias in the target' {
-            $edge = @($script:Graph.edges | Where-Object { $_.reason -eq 'alias-not-declared' })
+            $edge = @($script:Graph.edges | Where-Object { $_.reason -like 'alias-not-declared:*' })
             $edge.Count | Should-Be 1
             $edge[0].to | Should-BeString 'yaml:@nope/ghost/x.yml'
             $edge[0].refKind | Should-BeString 'template'
         }
 
         It 'reports a missing file as file-not-found, which needs a different fix' {
-            $edge = @($script:Graph.edges | Where-Object { $_.reason -eq 'file-not-found' })
+            $edge = @($script:Graph.edges | Where-Object { $_.reason -like 'file-not-found:*' })
             $edge.Count | Should-Be 1
             $edge[0].to | Should-BeString 'yaml:shared/steps/missing.yml'
         }
@@ -232,7 +240,9 @@ Describe 'Get-AzDoPipelineDependencyGraph' {
             $edge.Count | Should-Be 1
             $edge[0].to | Should-BeString 'yaml:shared/templates/stages.yml'
             $edge[0].ref | Should-BeString 'templates/stages.yml@sharedTemplates'
-            $edge[0].alias | Should-BeString 'sharedTemplates'
+            # No alias: it is already a suffix of ref, and saying it twice is
+            # one difference per edge against a hand-authored oracle.
+            $edge[0].PSObject.Properties.Name | Should-NotContainCollection 'alias'
         }
 
         It 'records checkout as a repository dependency and invents no template edge from it' {

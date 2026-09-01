@@ -82,7 +82,8 @@ function Get-AzDoPipelineDependencyGraph {
 
     foreach ($definition in $definitions) {
         $pipelineId = "pipeline:$($definition.Name)"
-        Add-AzDoGraphNode -Node $nodes -Id $pipelineId -Kind 'pipeline' -Name $definition.Name
+        Add-AzDoGraphNode -Node $nodes -Id $pipelineId -Kind 'pipeline' -Name $definition.Name `
+            -Repository $definition.Repository
 
         if (-not $definition.YamlPath -or -not $definition.Repository) {
             Write-Verbose "Definition '$($definition.Name)' has no YAML file; it stays as an orphan node."
@@ -178,6 +179,20 @@ function Get-AzDoPipelineDependencyGraph {
     if ($backEdge.Count) {
         # A cycle that terminates silently is indistinguishable from no cycle.
         Write-Verbose "Back edges (the traversal did not descend through these): $($backEdge -join '; ')"
+    }
+
+    # A repository is in the graph when the graph has something IN it - a
+    # pipeline definition or a YAML file - or when a reference names it. Not
+    # because the project contains it: an empty repository, or one holding no
+    # pipeline and referenced by nothing, is not part of what these pipelines
+    # depend on and would turn the answer into "what is in this project".
+    #
+    # The two rules are not the same set. A repository can hold pipelines that
+    # nothing else references, and it is still where those pipelines live.
+    foreach ($node in @($nodes.Values)) {
+        if ($node.kind -notin 'pipeline', 'yaml') { continue }
+        if (-not $node.repo) { continue }
+        Add-AzDoGraphNode -Node $nodes -Id "repo:$($node.repo)" -Kind 'repo' -Name $node.repo
     }
 
     # Sorted, because a graph that changes order between two runs cannot be

@@ -96,7 +96,7 @@ function Resolve-AzDoPipelineReference {
                         # mistaken for a real one, and so the reader can see
                         # which alias was never declared.
                         $state['TargetId'] = "yaml:@$($Reference.Alias)/$($Reference.Path)"
-                        $state['Reason'] = 'alias-not-declared'
+                        $state['Reason'] = "alias-not-declared: '$($Reference.Alias)' is not in resources.repositories of $SourcePath, so the repository is unknown and the path cannot be resolved at all"
                         break
                     }
                     $repository = [string] $Alias[$Reference.Alias]
@@ -111,11 +111,15 @@ function Resolve-AzDoPipelineReference {
                 $state['TargetId'] = "yaml:$repository/$path"
 
                 if ($KnownRepository.Count -and $repository -notin $KnownRepository) {
-                    $state['Reason'] = 'repository-not-found'
+                    $state['Reason'] = "repository-not-found: '$repository' is not a repository in this project"
                     break
                 }
                 if ($TestFile -and -not (& $TestFile $repository $path)) {
-                    $state['Reason'] = 'file-not-found'
+                    # The reason names the RESOLVED path and repository, not the
+                    # reference text. Which of the two resolution rules ran is
+                    # the thing a reader cannot reconstruct, and it is what
+                    # makes "add the file" actionable.
+                    $state['Reason'] = "file-not-found: resolved to $path in $repository, which does not exist"
                     break
                 }
                 $state['Resolved'] = $true
@@ -132,11 +136,11 @@ function Resolve-AzDoPipelineReference {
                 $state['TargetId'] = "repo:$repository"
 
                 if ($Reference.Type -and $Reference.Type -notin 'git', 'azureRepo', 'azureRepos') {
-                    $state['Reason'] = 'repository-not-found'
+                    $state['Reason'] = "repository-not-found: '$repository' is declared as type '$($Reference.Type)', which is not a repository in this project"
                     break
                 }
                 if ($KnownRepository.Count -and $repository -notin $KnownRepository) {
-                    $state['Reason'] = 'repository-not-found'
+                    $state['Reason'] = "repository-not-found: '$repository' is named by resources.repositories of $SourcePath but is not a repository in this project"
                     break
                 }
                 $state['Resolved'] = $true
@@ -146,7 +150,7 @@ function Resolve-AzDoPipelineReference {
                 $state['TargetKind'] = 'repo'
                 if (-not $Alias.Contains($Reference.Alias)) {
                     $state['TargetId'] = "repo:@$($Reference.Alias)"
-                    $state['Reason'] = 'alias-not-declared'
+                    $state['Reason'] = "alias-not-declared: '$($Reference.Alias)' is checked out by $SourcePath but is not in its resources.repositories, so the repository is unknown"
                     break
                 }
                 $repository = [string] $Alias[$Reference.Alias]
@@ -154,7 +158,7 @@ function Resolve-AzDoPipelineReference {
                 $state['TargetId'] = "repo:$repository"
 
                 if ($KnownRepository.Count -and $repository -notin $KnownRepository) {
-                    $state['Reason'] = 'repository-not-found'
+                    $state['Reason'] = "repository-not-found: alias '$($Reference.Alias)' names '$repository', which is not a repository in this project"
                     break
                 }
                 $state['Resolved'] = $true
@@ -165,7 +169,7 @@ function Resolve-AzDoPipelineReference {
                 $state['TargetKind'] = 'pipeline'
                 $state['TargetId'] = "pipeline:$($Reference.Name)"
                 if ($KnownPipeline.Count -and $Reference.Name -notin $KnownPipeline) {
-                    $state['Reason'] = 'pipeline-not-found'
+                    $state['Reason'] = "pipeline-not-found: no definition named '$($Reference.Name)' in this project"
                     break
                 }
                 $state['Resolved'] = $true

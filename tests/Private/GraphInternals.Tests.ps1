@@ -59,14 +59,20 @@ Describe 'Add-AzDoGraphNode' {
         }
     }
 
-    It 'writes repo and path on a yaml node and on no other kind' {
+    It 'writes repo on the two kinds that live somewhere, and path only on yaml' {
         InModuleScope PSAzureDevOpsGraph {
             $nodes = [ordered]@{}
             Add-AzDoGraphNode -Node $nodes -Id 'yaml:a/b.yml' -Kind 'yaml' -Name 'b.yml' -Repository 'a' -Path 'repos/a/b.yml'
             Add-AzDoGraphNode -Node $nodes -Id 'pipeline:P' -Kind 'pipeline' -Name 'P' -Repository 'a'
+            Add-AzDoGraphNode -Node $nodes -Id 'repo:a' -Kind 'repo' -Name 'a' -Repository 'a'
 
             $nodes['yaml:a/b.yml'].path | Should-BeString 'repos/a/b.yml'
-            $nodes['pipeline:P'].PSObject.Properties.Name | Should-NotContainCollection 'repo'
+            # A pipeline node's repository is not readable from its id, so it is
+            # a positive fact worth writing.
+            $nodes['pipeline:P'].repo | Should-BeString 'a'
+            $nodes['pipeline:P'].PSObject.Properties.Name | Should-NotContainCollection 'path'
+            # A repo node's name already is the repository.
+            $nodes['repo:a'].PSObject.Properties.Name | Should-BeCollection @('id', 'kind', 'name')
         }
     }
 }

@@ -63,7 +63,10 @@ Describe 'Resolve-AzDoPipelineReference' {
                 -SourceRepository 'consumer-app' -SourcePath 'azure-pipelines.yml'
 
             $result.Resolved | Should-BeFalse
-            $result.Reason | Should-BeString 'alias-not-declared'
+            # The reason carries a code AND an explanation naming the file that
+            # made the reference; the code alone does not say where to look.
+            $result.Reason | Should-MatchString '^alias-not-declared: .+ghostTemplates'
+            $result.Reason | Should-MatchString 'azure-pipelines\.yml'
             $result.TargetId | Should-BeString 'yaml:@ghostTemplates/steps/notify.yml'
         }
     }
@@ -77,7 +80,9 @@ Describe 'Resolve-AzDoPipelineReference' {
                 -TestFile { param($r, $p) $false }
 
             $result.Resolved | Should-BeFalse
-            $result.Reason | Should-BeString 'file-not-found'
+            # Names the RESOLVED path and repository, which is the half a reader
+            # cannot reconstruct from the reference text.
+            $result.Reason | Should-MatchString '^file-not-found: resolved to templates/gone\.yml in pipelines-main'
         }
 
         It 'keeps file-not-found and alias-not-declared distinct, because the fixes differ' {
@@ -94,7 +99,7 @@ Describe 'Resolve-AzDoPipelineReference' {
             $ref = @(Get-AzDoPipelineReference -Content "steps:`n  - template: a.yml@far`n")[0]
             $result = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository 'r' -SourcePath 'p.yml' `
                 -Alias @{ far = 'elsewhere' } -KnownRepository @('r', 'other')
-            $result.Reason | Should-BeString 'repository-not-found'
+            $result.Reason | Should-MatchString '^repository-not-found:'
         }
     }
 
@@ -136,7 +141,7 @@ resources:
         It 'reports alias-not-declared for a checkout of an undeclared alias' {
             $ref = @(Get-AzDoPipelineReference -Content "steps:`n  - checkout: tools`n")[0]
             $result = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository 'a' -SourcePath 'b.yml'
-            $result.Reason | Should-BeString 'alias-not-declared'
+            $result.Reason | Should-MatchString '^alias-not-declared:'
             $result.TargetId | Should-BeString 'repo:@tools'
         }
 
@@ -163,7 +168,7 @@ resources:
 "@)[0]
             $result = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository 'a' -SourcePath 'b.yml' `
                 -KnownPipeline @('Upstream-Build')
-            $result.Reason | Should-BeString 'pipeline-not-found'
+            $result.Reason | Should-MatchString '^pipeline-not-found:'
         }
     }
 }
