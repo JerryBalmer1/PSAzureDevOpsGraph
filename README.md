@@ -15,8 +15,12 @@ What is measured, and against what:
   from a mock. They cover the parser, both resolution rules, graph assembly
   (orphans, cycles, shared templates, unresolved references) and the three
   export formats.
-- **One live project** has been read end to end: `jlbalmerjr1/ClaudeTesting`.
-  Everything below about real-world behaviour comes from that one project.
+- **One live project** has been read end to end: `jlbalmerjr1/ClaudeTesting` —
+  15 pipeline definitions across 5 repositories, producing 48 nodes and 51
+  edges, of which 2 are unresolved. The output is committed under
+  [artifacts/](artifacts/) as JSON, DOT and HTML, and validates against
+  `graph.schema.json`. Everything below about real-world behaviour comes from
+  that one project.
 
 What is **not** measured: no second organisation, no project large enough to
 page, no non-default branch beyond a single `-Ref` round trip, and no classic
@@ -42,12 +46,18 @@ $graph.edges | Where-Object kind -eq 'unresolved' |
     Select-Object from, ref, reason
 ```
 
+Real output from the project named above, not an illustration:
+
 ```
-from                                     ref                              reason
-----                                     ---                              ------
-yaml:consumer-app/azure-pipelines.yml    steps/notify.yml@ghostTemplates  alias-not-declared
-yaml:pipelines-main/pipelines/p07.yml    templates/missing-steps.yml      file-not-found
+from                                  ref                             reason
+----                                  ---                             ------
+yaml:pipelines-main/pipelines/p09.yml steps/common.yml@ghostTemplates alias-not-declared
+yaml:pipelines-main/pipelines/p09.yml templates/missing-steps.yml     file-not-found
 ```
+
+Two broken references in one file, needing two different fixes: the first
+needs a `resources.repositories` entry for `ghostTemplates`, the second needs
+the file.
 
 Then write something to look at, or to diff:
 
