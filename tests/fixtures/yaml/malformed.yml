@@ -1,0 +1,3 @@
+steps:
+  - template: a.yml
+   - this: "is not valid yaml

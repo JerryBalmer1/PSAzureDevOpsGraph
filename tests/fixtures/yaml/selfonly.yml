@@ -1,0 +1,5 @@
+# Everything here must produce no references at all.
+steps:
+  - checkout: self
+  - checkout: none
+  - script: echo "template: not-a-reference.yml"

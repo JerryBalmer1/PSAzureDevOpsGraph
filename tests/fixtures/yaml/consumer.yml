@@ -1,0 +1,37 @@
+# Input data for the parser tests. The imperfections here are load-bearing:
+# buildTemplate is the substring trap, and ghostTemplates is deliberately never
+# declared. Do not "fix" either of them.
+trigger:
+  - main
+
+resources:
+  repositories:
+    - repository: mainPipelines
+      type: git
+      name: pipelines-main
+      ref: refs/heads/main
+    - repository: tools
+      type: git
+      name: tooling
+  pipelines:
+    - pipeline: upstream
+      source: Upstream-Build
+
+parameters:
+  - name: buildTemplate
+    type: string
+    default: templates/steps-build.yml
+
+variables:
+  - template: templates/vars-common.yml
+
+extends:
+  template: templates/stages-standard.yml@mainPipelines
+  parameters:
+    poolName: default
+
+steps:
+  - checkout: self
+  - checkout: tools
+  - template: steps/notify.yml@ghostTemplates
+  - template: ../shared/steps-lint.yml

@@ -1,0 +1,102 @@
+TOPIC
+    about_PSAzureDevOpsGraph
+
+SHORT DESCRIPTION
+    Produces a dependency graph of Azure DevOps pipelines and the repositories
+    and templates they reference. Read-only, always.
+
+LONG DESCRIPTION
+    Azure DevOps pipeline YAML composes by reference. A pipeline pulls in
+    templates, templates pull in other templates, and those references cross
+    repository boundaries. None of it is visible from any one file, so the
+    question nobody can answer by reading a repository is: if I change this
+    template, which pipelines break?
+
+    PSAzureDevOpsGraph answers it by walking a project's pipeline definitions,
+    parsing every reference in the YAML behind them, resolving each one to a
+    repository and a path, and emitting the result as data.
+
+CREDENTIALS
+    A personal access token, read from $env:AZDO_PAT, and from nowhere else.
+
+    Not a file path. Not a parameter with a default. Not a parameter at all.
+    A value passed as a parameter ends up in PSReadLine history, in
+    Start-Transcript output, and in the ScriptBlock logging event log, and a PAT
+    is a bearer credential for an entire organisation.
+
+    The token needs Code (Read) and Build (Read). If the variable is absent,
+    every command fails with a message naming it. Nothing prompts, nothing
+    searches for a file, and nothing falls back to anonymous access.
+
+        $env:AZDO_PAT = '<your token>'
+
+WHAT IT WILL NOT DO
+    Read-only, permanently, and there is no -Force that changes it:
+
+    - It never queues, runs, or triggers a pipeline.
+    - It never creates, updates, or deletes anything in Azure DevOps.
+    - No exported command is named with a writing verb.
+
+    A tool that walks an organisation's pipelines is exactly the kind of thing
+    run with a high-privilege token. That is the reason for the constraint
+    rather than an exception to it.
+
+CONCEPTS
+    Reference
+        Something one YAML document says about another file, repository or
+        pipeline. Five kinds: template, extends, repositoryResource,
+        pipelineResource and checkout. extends.template is an extends
+        reference, not a template one, and "checkout: self" is not a reference
+        at all.
+
+    Resolution
+        Where a reference points. Two rules, and they produce different files
+        from the same text:
+
+          - Without an @alias, the path is relative to the DIRECTORY OF THE
+            FILE MAKING THE REFERENCE.
+          - With an @alias, the path is joined to the ROOT of the repository
+            that alias names, where the alias comes from the
+            resources.repositories of the file making the reference.
+
+        Parsing and resolution are two commands on purpose. Parsing needs a
+        file; resolution needs to know what exists. A combined command reports
+        resolution failures as parsing results, with no way to tell which half
+        was wrong.
+
+    Unresolved reference
+        A reference that could not be resolved is a RESULT, never a dropped
+        edge: a broken pipeline that vanishes from the output looks identical to
+        a clean one. Two reasons are kept apart because they need different
+        fixes - file-not-found means add the file, alias-not-declared means add
+        the resources.repositories entry.
+
+    Node identity
+        A node is what it is, not where a traversal reached it. A template
+        included by two pipelines is ONE node with in-degree 2. An orphan
+        pipeline is still a node. A repository nothing references is not in the
+        graph at all - the graph answers what these pipelines depend on, not
+        what the project contains.
+
+A WORKED SEQUENCE
+    Substitute your own organisation and project.
+
+        $env:AZDO_PAT = '<token with Code (Read) and Build (Read)>'
+
+        $graph = Get-AzDoPipelineDependencyGraph -Organisation <org> -Project <project>
+
+        # What is broken, which is the answer this exists to give.
+        $graph.edges | Where-Object kind -eq 'unresolved'
+
+        # What would break if templates/steps-build.yml changed.
+        $graph.edges | Where-Object to -eq 'yaml:pipelines-main/templates/steps-build.yml'
+
+        Export-AzDoPipelineDependencyGraph -Graph $graph -Format Html -Path ./graph.html
+
+    The HTML page is self-contained and opens from a file:// URL with no
+    network access.
+
+SEE ALSO
+    Get-AzDoRepository, Get-AzDoPipeline, Get-AzDoPipelineYaml,
+    Get-AzDoPipelineReference, Resolve-AzDoPipelineReference,
+    Get-AzDoPipelineDependencyGraph, Export-AzDoPipelineDependencyGraph
