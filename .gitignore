@@ -1,0 +1,12 @@
+# Build and test output.
+output/
+testResults/
+*.nupkg
+
+# Credentials. PSAzureDevOpsGraph reads its PAT from $env:AZDO_PAT and from
+# nowhere else, so a credential file in this repository is a mistake by
+# definition. These patterns are here to make that mistake harder rather than
+# to support any supported way of supplying one.
+*.pat
+**/pat.txt
+AzDoPAT.txt
