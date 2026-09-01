@@ -147,9 +147,23 @@ Describe 'Reading Azure DevOps' {
             $script:EdgeKeys | Should-ContainCollection -Expected 'pipeline:Orphan|yaml:pipelines-main/pipelines/orphan.yml|definition'
         }
 
-        It 'excludes a repository nothing references' {
+        It 'excludes a repository that neither hosts a definition nor is referenced' {
             $script:NodeIds | Should-NotContainCollection -Expected 'repo:nothing-references-me'
             $script:NodeIds | Should-NotContainCollection -Expected 'repo:templates-shared'
+        }
+
+        It 'includes the repository a definition lives in, and says so on the pipeline node' {
+            # Where the pipeline would have to be changed is part of the answer.
+            $script:NodeIds | Should-ContainCollection -Expected 'repo:consumer-app'
+            ($script:Graph.nodes | Where-Object { $_.id -eq 'pipeline:Consumer' }).repo | Should-Be 'consumer-app'
+        }
+
+        It 'puts an alias only on an edge whose ref does not already carry one' {
+            foreach ($edge in $script:Graph.edges) {
+                if ($edge.PSObject.Properties['alias']) {
+                    $edge.kind | Should-MatchString '^(repositoryResource|pipelineResource)$'
+                }
+            }
         }
 
         It 'includes a repository a checkout or a resource references' {
@@ -192,11 +206,15 @@ Describe 'Reading Azure DevOps' {
         It 'keeps an unresolved reference as a result carrying a reason' {
             $unresolved = @($script:Graph.edges | Where-Object { $_.kind -eq 'unresolved' })
             $unresolved.Count | Should-Be 2
-            @($unresolved.reason | Sort-Object) | Should-BeCollection -Expected @('alias-not-declared', 'file-not-found')
+            @($unresolved.reason | ForEach-Object { ($_ -split ':')[0] } | Sort-Object) |
+                Should-BeCollection -Expected @('alias-not-declared', 'file-not-found')
+            # The explanation names the thing that has to change.
+            ($unresolved | Where-Object { $_.reason -like 'file-not-found*' }).reason |
+                Should-MatchString 'which does not exist$'
         }
 
         It 'keeps an undeclared alias in the unresolved target id so it cannot collide with a real node' {
-            $ghost = @($script:Graph.edges | Where-Object { $_.reason -eq 'alias-not-declared' })
+            $ghost = @($script:Graph.edges | Where-Object { $_.reason -like 'alias-not-declared*' })
             $ghost[0].to | Should-Be 'yaml:@ghostTemplates/steps/common.yml'
             $script:NodeIds | Should-NotContainCollection -Expected 'yaml:@ghostTemplates/steps/common.yml'
         }

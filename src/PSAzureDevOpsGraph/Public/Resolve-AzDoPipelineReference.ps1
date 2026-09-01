@@ -19,6 +19,11 @@ function Resolve-AzDoPipelineReference {
         A reference that does not resolve comes back as a result carrying a
         reason, never as an error and never dropped. A broken pipeline that
         vanishes from the output looks identical to a clean one.
+
+        The reason is 'token: explanation'. The token is the machine half - the
+        two are kept distinct because they need different fixes - and the
+        explanation names the file, the alias or the path that has to change, so
+        a reader does not have to open the graph to find out what to do.
     .PARAMETER Reference
         One reference record from Get-AzDoPipelineReference.
     .PARAMETER SourceRepository
@@ -65,7 +70,7 @@ function Resolve-AzDoPipelineReference {
                         $path = Join-AzDoRepoPath -BasePath '' -Reference $Reference.Path
                     } else {
                         $resolved = $false
-                        $reason = 'alias-not-declared'
+                        $reason = "alias-not-declared: '$($Reference.Alias)' is not in resources.repositories of $SourcePath, so the repository is unknown and the path cannot be resolved at all"
                     }
                 } else {
                     $repository = $SourceRepository
@@ -74,7 +79,7 @@ function Resolve-AzDoPipelineReference {
 
                 if ($resolved -and $TestFile -and -not (& $TestFile $repository $path)) {
                     $resolved = $false
-                    $reason = 'file-not-found'
+                    $reason = "file-not-found: resolved to $path in $repository, which does not exist"
                 }
                 break
             }
@@ -91,7 +96,7 @@ function Resolve-AzDoPipelineReference {
                     $repository = [string] $Alias[$Reference.Alias]
                 } else {
                     $resolved = $false
-                    $reason = 'alias-not-declared'
+                    $reason = "alias-not-declared: '$($Reference.Alias)' is not in resources.repositories of $SourcePath, so the repository is unknown and the path cannot be resolved at all"
                 }
                 break
             }
@@ -105,7 +110,7 @@ function Resolve-AzDoPipelineReference {
         # An unresolved target must not collide with a real node. Keeping the
         # alias in the id is what makes that impossible, and it says which alias
         # was missing without guessing a repository.
-        $targetId = if (-not $resolved -and $reason -eq 'alias-not-declared') {
+        $targetId = if (-not $resolved -and $reason -like 'alias-not-declared*') {
             if ($targetKind -eq 'repo') { "repo:@$($Reference.Alias)" }
             else { "yaml:@$($Reference.Alias)/$($Reference.Path)" }
         } elseif ($targetKind -eq 'repo') {

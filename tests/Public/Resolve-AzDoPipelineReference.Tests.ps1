@@ -59,7 +59,7 @@ Describe 'Resolve-AzDoPipelineReference' {
             -SourceRepository 'consumer-app' -SourcePath 'azure-pipelines.yml' -Alias @{}
 
         $resolution.Resolved | Should-BeFalse
-        $resolution.Reason | Should-Be 'alias-not-declared'
+        $resolution.Reason | Should-MatchString "^alias-not-declared: 'ghostTemplates' is not in resources\.repositories of azure-pipelines\.yml,"
         $resolution.TargetId | Should-Be 'yaml:@ghostTemplates/steps/common.yml'
     }
 
@@ -70,7 +70,7 @@ Describe 'Resolve-AzDoPipelineReference' {
             -TestFile { param($r, $p) $false }
 
         $resolution.Resolved | Should-BeFalse
-        $resolution.Reason | Should-Be 'file-not-found'
+        $resolution.Reason | Should-MatchString '^file-not-found: resolved to templates/gone\.yml in pipelines-main, which does not exist$'
     }
 
     It 'keeps the two unresolved reasons distinct, because they need different fixes' {
@@ -80,8 +80,10 @@ Describe 'Resolve-AzDoPipelineReference' {
         $first = Resolve-AzDoPipelineReference -Reference $missingFile -SourceRepository 'r' -SourcePath 'p.yml' -TestFile { param($r, $p) $false }
         $second = Resolve-AzDoPipelineReference -Reference $missingAlias -SourceRepository 'r' -SourcePath 'p.yml'
 
-        $first.Reason | Should-Be 'file-not-found'
-        $second.Reason | Should-Be 'alias-not-declared'
+        # The token is the machine half and comes first; the explanation names
+        # what has to change.
+        $first.Reason | Should-MatchString '^file-not-found: '
+        $second.Reason | Should-MatchString '^alias-not-declared: '
     }
 
     It 'resolves a checkout to the repository its alias names' {

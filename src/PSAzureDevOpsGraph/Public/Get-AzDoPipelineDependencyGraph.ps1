@@ -75,9 +75,20 @@ function Get-AzDoPipelineDependencyGraph {
 
         # --- Seed from the definition list, so orphans survive -----------------
         foreach ($definition in Get-AzDoPipeline -Organisation $Organisation -Project $Project) {
-            Add-Node ([ordered] @{ id = "pipeline:$($definition.Name)"; kind = 'pipeline'; name = $definition.Name })
+            $pipelineNode = [ordered] @{ id = "pipeline:$($definition.Name)"; kind = 'pipeline'; name = $definition.Name }
+            if ($definition.RepositoryName) { $pipelineNode['repo'] = $definition.RepositoryName }
+            Add-Node $pipelineNode
 
-            if (-not $definition.YamlPath -or -not $definition.RepositoryName) { continue }
+            if (-not $definition.RepositoryName) { continue }
+
+            # The repository a definition lives in is part of the answer: it is
+            # where the pipeline would have to be changed. A repository that
+            # neither hosts a definition nor is referenced by one stays out -
+            # that is still the rule, and it is what keeps an empty repository
+            # nobody touches from appearing.
+            Add-Node ([ordered] @{ id = "repo:$($definition.RepositoryName)"; kind = 'repo'; name = $definition.RepositoryName })
+
+            if (-not $definition.YamlPath) { continue }
 
             $yamlId = "yaml:$($definition.RepositoryName)/$($definition.YamlPath)"
             $definitionNode = [ordered] @{
@@ -129,7 +140,13 @@ function Get-AzDoPipelineDependencyGraph {
                     ref  = $item.Reference
                 }
                 if (-not $resolution.Resolved) { $edge['refKind'] = $item.Kind }
-                if ($item.Alias) { $edge['alias'] = $item.Alias }
+                # alias only where it is information the ref does not already
+                # carry. A template's @alias is inside its ref text and a
+                # checkout's ref IS the alias; a resource declares one that
+                # nothing else states.
+                if ($item.Alias -and $item.Kind -in 'repositoryResource', 'pipelineResource') {
+                    $edge['alias'] = $item.Alias
+                }
                 if (-not $resolution.Resolved) { $edge['reason'] = $resolution.Reason }
 
                 # ALWAYS record the edge, then decline to descend.
