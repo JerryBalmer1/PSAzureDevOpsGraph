@@ -91,7 +91,13 @@ function Resolve-AzDoPipelineReference {
                 if ($refAlias) {
                     if ($refAlias -eq 'self') { $repository = $SourceRepository }
                     elseif ($Alias.ContainsKey($refAlias)) { $repository = $Alias[$refAlias] }
-                    else { & $unresolved 'alias-not-declared' $null $Reference.Path; return }
+                    else {
+                        # The repository is unknown, so the path cannot be placed
+                        # at all. Naming the alias in the target keeps the edge
+                        # distinguishable from any resolved one.
+                        & $unresolved ("alias-not-declared: '$refAlias' is not in resources.repositories of $SourcePath, so the repository is unknown and the path cannot be resolved at all") "@$refAlias" $Reference.Path
+                        return
+                    }
                     # Anchored at the root of the aliased repository.
                     $path = Resolve-AzDoRelativePath -BaseDirectory '' -Path $Reference.Path
                 }
@@ -133,7 +139,10 @@ function Resolve-AzDoPipelineReference {
                     $repository = if ($tail -match '/') { ($tail -split '/')[-1] } else { $tail }
                 }
                 elseif ($Alias.ContainsKey($value)) { $repository = $Alias[$value] }
-                else { & $unresolved 'alias-not-declared' $null $null; return }
+                else {
+                    & $unresolved ("alias-not-declared: '$value' is not in resources.repositories of $SourcePath, so the repository is unknown and the path cannot be resolved at all") "@$value" $null
+                    return
+                }
                 if ($KnownRepository -and $repository -notin $KnownRepository) {
                     & $unresolved 'repository-not-found' $repository $null; return
                 }

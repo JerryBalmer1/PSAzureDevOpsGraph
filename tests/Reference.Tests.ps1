@@ -179,8 +179,12 @@ Describe 'Resolve-AzDoPipelineReference' {
     It 'reports an undeclared alias rather than guessing' {
         $ref = [pscustomobject]@{ Kind = 'template'; Reference = 'steps/common.yml@ghostTemplates'; Path = 'steps/common.yml'; Alias = 'ghostTemplates'; Line = 1 }
         $r = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository pipelines-main -SourcePath 'pipelines/p09.yml' -Alias @{ sharedTemplates = 'templates-shared' }
-        $r.Resolved | Should -BeFalse
-        $r.Reason   | Should -Be 'alias-not-declared'
+        $r.Resolved   | Should -BeFalse
+        # The reason names the token first so it can be grouped on, then says
+        # enough that the edge can be acted on without re-reading the YAML.
+        $r.Reason     | Should -Match "^alias-not-declared: 'ghostTemplates' is not in resources\.repositories of pipelines/p09\.yml"
+        $r.Repository | Should -Be '@ghostTemplates'
+        $r.Path       | Should -Be 'steps/common.yml'
     }
 
     It 'takes the repository name from a Project/Repository resource name' {

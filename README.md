@@ -98,16 +98,28 @@ Edges are `definition` (a pipeline to the YAML it is registered against),
 `template`, `extends`, `pipelineResource`, `repositoryResource`, `checkout`, and
 `unresolved`.
 
-Three things the walk does deliberately:
+Four things the walk does deliberately:
 
-- **Every repository in the project is a node**, including empty ones and ones
-  no pipeline touches. A project with an empty repository must not look
-  identical to a project without one.
+- **A repository is a node when it takes part** — when it holds one of the YAML
+  files, or when something references it. A repository that holds no pipeline
+  YAML and that nothing points at is not a dependency of anything, and adding it
+  would put a node in the graph with no path to any pipeline. Use
+  `Get-AzDoRepository` for the inventory; that command does list empty ones.
+- **`checkout: self` is not an edge.** It is the repository the file is already
+  in — a build instruction, not a dependency the file would not otherwise have.
+  `checkout: <alias>` is an edge, because it pulls in a second repository.
 - **A reference that cannot be resolved becomes an `unresolved` edge carrying a
   reason** — never a dropped edge. A broken pipeline that vanishes from the
-  output looks exactly like a clean one, which is the opposite of useful.
+  output looks exactly like a clean one, which is the opposite of useful. The
+  edge still points at the place the file should have been, so it can be acted
+  on; where even the repository is unknown, the target names the alias
+  (`yaml:@ghostTemplates/steps/common.yml`).
 - **The walk is cycle-safe.** A template cycle is a thing real projects contain.
   It is reported, not treated as an error.
+
+`alias` on an edge records where an alias is *declared* — the `repository:` key
+of a repository resource, the `pipeline:` key of a pipeline resource. It is not
+repeated on edges that merely use one; the use is already in `ref`.
 
 ## Build
 

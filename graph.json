@@ -95,11 +95,6 @@
       "repo": "templates-platform"
     },
     {
-      "id": "repo:ClaudeTesting",
-      "kind": "repo",
-      "name": "ClaudeTesting"
-    },
-    {
       "id": "repo:consumer-app",
       "kind": "repo",
       "name": "consumer-app"
@@ -408,12 +403,6 @@
     },
     {
       "from": "yaml:consumer-app/azure-pipelines.yml",
-      "to": "repo:consumer-app",
-      "kind": "checkout",
-      "ref": "self"
-    },
-    {
-      "from": "yaml:consumer-app/azure-pipelines.yml",
       "to": "repo:pipelines-main",
       "kind": "repositoryResource",
       "ref": "ClaudeTesting/pipelines-main",
@@ -423,8 +412,7 @@
       "from": "yaml:consumer-app/azure-pipelines.yml",
       "to": "repo:templates-shared",
       "kind": "checkout",
-      "ref": "sharedTemplates",
-      "alias": "sharedTemplates"
+      "ref": "sharedTemplates"
     },
     {
       "from": "yaml:consumer-app/azure-pipelines.yml",
@@ -443,8 +431,7 @@
       "from": "yaml:consumer-app/azure-pipelines.yml",
       "to": "yaml:pipelines-main/templates/steps-build.yml",
       "kind": "template",
-      "ref": "templates/steps-build.yml@mainPipelines",
-      "alias": "mainPipelines"
+      "ref": "templates/steps-build.yml@mainPipelines"
     },
     {
       "from": "yaml:consumer-app/pipelines/release.yml",
@@ -464,8 +451,7 @@
       "from": "yaml:consumer-app/pipelines/release.yml",
       "to": "yaml:templates-platform/jobs/release.yml",
       "kind": "template",
-      "ref": "jobs/release.yml@platformTemplates",
-      "alias": "platformTemplates"
+      "ref": "jobs/release.yml@platformTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p01.yml",
@@ -490,8 +476,7 @@
       "from": "yaml:pipelines-main/pipelines/p03.yml",
       "to": "yaml:templates-platform/jobs/release.yml",
       "kind": "extends",
-      "ref": "jobs/release.yml@platformTemplates",
-      "alias": "platformTemplates"
+      "ref": "jobs/release.yml@platformTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p04.yml",
@@ -511,15 +496,13 @@
       "from": "yaml:pipelines-main/pipelines/p04.yml",
       "to": "yaml:templates-platform/steps/deploy.yml",
       "kind": "template",
-      "ref": "steps/deploy.yml@platformTemplates",
-      "alias": "platformTemplates"
+      "ref": "steps/deploy.yml@platformTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p04.yml",
       "to": "yaml:templates-shared/steps/common.yml",
       "kind": "template",
-      "ref": "steps/common.yml@sharedTemplates",
-      "alias": "sharedTemplates"
+      "ref": "steps/common.yml@sharedTemplates"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p05.yml",
@@ -567,20 +550,19 @@
     },
     {
       "from": "yaml:pipelines-main/pipelines/p09.yml",
-      "to": "unresolved:steps/common.yml@ghostTemplates",
+      "to": "yaml:@ghostTemplates/steps/common.yml",
       "kind": "unresolved",
       "ref": "steps/common.yml@ghostTemplates",
       "refKind": "template",
-      "alias": "ghostTemplates",
-      "reason": "alias-not-declared"
+      "reason": "alias-not-declared: 'ghostTemplates' is not in resources.repositories of pipelines/p09.yml, so the repository is unknown and the path cannot be resolved at all"
     },
     {
       "from": "yaml:pipelines-main/pipelines/p09.yml",
-      "to": "unresolved:templates/missing-steps.yml",
+      "to": "yaml:pipelines-main/pipelines/templates/missing-steps.yml",
       "kind": "unresolved",
       "ref": "templates/missing-steps.yml",
       "refKind": "template",
-      "reason": "file-not-found"
+      "reason": "file-not-found: resolved to pipelines/templates/missing-steps.yml in pipelines-main, which does not exist"
     },
     {
       "from": "yaml:pipelines-main/pipelines/templates/chain-a.yml",
@@ -636,8 +618,7 @@
       "from": "yaml:templates-shared/pipelines/nightly.yml",
       "to": "yaml:pipelines-main/templates/steps-build.yml",
       "kind": "template",
-      "ref": "templates/steps-build.yml@mainPipelines",
-      "alias": "mainPipelines"
+      "ref": "templates/steps-build.yml@mainPipelines"
     },
     {
       "from": "yaml:templates-shared/pipelines/nightly.yml",
