@@ -1,0 +1,27 @@
+{
+  "expected": "C:\\__Code\\__AI.Agent.Claude.PowerShellModuleBuilder\\AI.Agent.Claude.PowerShellModuleBuilder\\evals\\functional\\fixture\\expected-graph.json",
+  "candidate": "C:\\__Code\\__AI.Agent.Claude.PowerShellModuleBuilder\\AI.Agent.Claude.PowerShellModuleBuilder\\scratch\\runs\\006-plugin-on\\artifacts\\graph.json",
+  "agree": true,
+  "differenceCount": 0,
+  "cases": [],
+  "countsByKind": {},
+  "excluded": [
+    {
+      "field": "cases",
+      "reason": "An oracle annotation. A module has never read cases.md and cannot produce case tags, so requiring them would fail every candidate for something it cannot know."
+    },
+    {
+      "field": "note",
+      "reason": "Human prose explaining a node or edge to a reader. Carries no graph content."
+    },
+    {
+      "field": "generatedBy",
+      "reason": "Names the command that produced a run graph. Absent from the oracle by design, per graph.schema.json, so comparing it would fail every real candidate."
+    },
+    {
+      "field": "(array order)",
+      "reason": "Nodes and edges are sets. A graph is not more correct for having been assembled in a particular order."
+    }
+  ],
+  "differences": []
+}

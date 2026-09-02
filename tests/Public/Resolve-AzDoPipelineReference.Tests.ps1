@@ -46,7 +46,7 @@ Describe 'Resolve-AzDoPipelineReference' {
         $ref = Get-AzDoPipelineReference -Yaml 'steps: [ { template: "steps/common.yml@ghostTemplates" } ]'
         $result = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository pipelines-main -SourcePath pipelines/p09.yml -Alias $script:Aliases -KnownPath $script:Known
         $result.Resolved | Should-BeFalse
-        $result.Reason | Should-Be 'alias-not-declared'
+        $result.Reason | Should-MatchString "^alias-not-declared: 'ghostTemplates' is not in resources.repositories of pipelines/p09.yml"
     }
 
     It 'reports file-not-found when the alias resolved but no such file exists' {
@@ -55,7 +55,7 @@ Describe 'Resolve-AzDoPipelineReference' {
         $ref = Get-AzDoPipelineReference -Yaml 'steps: [ { template: templates/missing-steps.yml } ]'
         $result = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository pipelines-main -SourcePath pipelines/p09.yml -Alias $script:Aliases -KnownPath $script:Known
         $result.Resolved | Should-BeFalse
-        $result.Reason | Should-Be 'file-not-found'
+        $result.Reason | Should-MatchString '^file-not-found: resolved to pipelines/templates/missing-steps.yml in pipelines-main'
     }
 
     It 'keeps the current repository a property of the file, not of the traversal' {
@@ -85,7 +85,7 @@ Describe 'Resolve-AzDoPipelineReference' {
         $ref = Get-AzDoPipelineReference -Yaml "steps:`n  - checkout: neverDeclared`n"
         $result = Resolve-AzDoPipelineReference -Reference $ref -SourceRepository consumer-app -SourcePath azure-pipelines.yml -Alias @{} -KnownPath $script:Known
         $result.Resolved | Should-BeFalse
-        $result.Reason | Should-Be 'alias-not-declared'
+        $result.Reason | Should-MatchString '^alias-not-declared: '
     }
 
     It 'points a pipeline resource at a definition rather than a file' {

@@ -75,13 +75,13 @@ function Get-AzDoPipelineDependencyGraph {
             param($Id, $Kind, $Name, $Repo, $Path)
             if ($nodes.ContainsKey($Id)) { return }
             $node = [ordered]@{ id = $Id; kind = $Kind; name = $Name }
-            # repo and path are the yaml node's fields -- the schema requires
-            # them there and says path is present on yaml nodes only. A pipeline
-            # node's repository is already stated by its definition edge.
-            if ($Kind -eq 'yaml') {
-                $node['repo'] = $Repo
-                $node['path'] = $Path
-            }
+            # A pipeline node carries the repository its definition lives in, and
+            # a yaml node carries its repository and path. path is the yaml
+            # node's alone -- the schema says so -- but repo is a positive fact
+            # about a definition too, and a repo node's own name already states
+            # it.
+            if ($Kind -in @('yaml', 'pipeline')) { $node['repo'] = $Repo }
+            if ($Kind -eq 'yaml') { $node['path'] = $Path }
             $nodes[$Id] = $node
         }
 
@@ -90,7 +90,17 @@ function Get-AzDoPipelineDependencyGraph {
         $pipelines = @(Get-AzDoPipeline -Organisation $Organisation -Project $Project)
         foreach ($pipeline in $pipelines) {
             $pipelineId = "pipeline:$($pipeline.Name)"
-            & $addNode $pipelineId 'pipeline' $pipeline.Name $null $null
+            & $addNode $pipelineId 'pipeline' $pipeline.Name $pipeline.RepositoryName $null
+
+            # A repository that HOSTS a definition is part of the answer, the
+            # same way one referenced by resources.repositories or checkout is:
+            # changing it can break the pipelines defined in it. What is still
+            # excluded is a repository that does neither -- the project's own
+            # empty repository is in the project, visible to any call that lists
+            # repositories, and must not appear.
+            if ($pipeline.RepositoryName) {
+                & $addNode "repo:$($pipeline.RepositoryName)" 'repo' $pipeline.RepositoryName $null $null
+            }
 
             if (-not $pipeline.YamlPath) {
                 Write-Verbose "Definition '$($pipeline.Name)' has no YAML process; no definition edge."
@@ -140,6 +150,15 @@ function Get-AzDoPipelineDependencyGraph {
                     -SourceRepository $file.Repository -SourcePath $file.Path `
                     -Alias $aliases -KnownPath $knownPath
 
+                # alias is written where the reference DECLARES one, and not
+                # where it merely uses one. On a resource entry the alias is the
+                # fact being stated. On a template, extends or checkout
+                # reference the alias is already inside ref -- as the @suffix,
+                # or as the whole of it -- so writing it again restates rather
+                # than adds, and in this contract an absent optional field means
+                # NOT STATED rather than false.
+                $declaresAlias = $reference.RefKind -in @('repositoryResource', 'pipelineResource')
+
                 $edge = [ordered]@{ from = $file.Id; to = $null; kind = $null; ref = $reference.Ref }
 
                 if (-not $resolution.Resolved) {
@@ -150,13 +169,17 @@ function Get-AzDoPipelineDependencyGraph {
                         'checkout' { "repo:@$($reference.Alias)" }
                         'pipelineResource' { "pipeline:@$($reference.Alias)" }
                         default {
-                            if ($resolution.Reason -eq 'alias-not-declared') { "yaml:@$($reference.Alias)/$($reference.Path)" }
+                            # Branches on ReasonCode, never on Reason. Reason is
+                            # a sentence written for a person; a decision taken
+                            # on its text breaks silently the moment the wording
+                            # improves, and produces an id like "yaml:/".
+                            if ($resolution.ReasonCode -eq 'alias-not-declared') { "yaml:@$($reference.Alias)/$($reference.Path)" }
                             else { "yaml:$($resolution.Repository)/$($resolution.Path)" }
                         }
                     }
                     $edge['kind'] = 'unresolved'
                     $edge['refKind'] = $reference.RefKind
-                    if ($reference.Alias) { $edge['alias'] = $reference.Alias }
+                    if ($declaresAlias) { $edge['alias'] = $reference.Alias }
                     $edge['reason'] = $resolution.Reason
                     $edges.Add($edge)
                     continue
@@ -168,7 +191,7 @@ function Get-AzDoPipelineDependencyGraph {
                         & $addNode $targetId 'repo' $resolution.Repository $null $null
                         $edge['to'] = $targetId
                         $edge['kind'] = $reference.RefKind
-                        if ($reference.Alias) { $edge['alias'] = $reference.Alias }
+                        if ($declaresAlias) { $edge['alias'] = $reference.Alias }
                         $edges.Add($edge)
                     }
                     'pipeline' {
@@ -176,11 +199,11 @@ function Get-AzDoPipelineDependencyGraph {
                         $edge['to'] = $targetId
                         if ($nodes.ContainsKey($targetId)) {
                             $edge['kind'] = $reference.RefKind
-                            if ($reference.Alias) { $edge['alias'] = $reference.Alias }
+                            if ($declaresAlias) { $edge['alias'] = $reference.Alias }
                         } else {
                             $edge['kind'] = 'unresolved'
                             $edge['refKind'] = $reference.RefKind
-                            if ($reference.Alias) { $edge['alias'] = $reference.Alias }
+                            if ($declaresAlias) { $edge['alias'] = $reference.Alias }
                             $edge['reason'] = 'file-not-found'
                         }
                         $edges.Add($edge)
@@ -190,7 +213,7 @@ function Get-AzDoPipelineDependencyGraph {
                         & $addNode $targetId 'yaml' $resolution.Path $resolution.Repository "repos/$($resolution.Repository)/$($resolution.Path)"
                         $edge['to'] = $targetId
                         $edge['kind'] = $reference.RefKind
-                        if ($reference.Alias) { $edge['alias'] = $reference.Alias }
+                        if ($declaresAlias) { $edge['alias'] = $reference.Alias }
 
                         # ALWAYS record the edge, then decline to descend.
                         $edges.Add($edge)

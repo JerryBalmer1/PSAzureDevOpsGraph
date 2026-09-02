@@ -18,6 +18,7 @@ digraph PSAzureDevOpsGraph {
   "pipeline:x02-platform-release" [label="x02-platform-release" shape=box3d fillcolor="#dbeafe"];
   "pipeline:x03-shared-nightly" [label="x03-shared-nightly" shape=box3d fillcolor="#dbeafe"];
   "pipeline:x04-cross-trigger" [label="x04-cross-trigger" shape=box3d fillcolor="#dbeafe"];
+  "repo:consumer-app" [label="consumer-app" shape=folder fillcolor="#fef3c7"];
   "repo:pipelines-main" [label="pipelines-main" shape=folder fillcolor="#fef3c7"];
   "repo:templates-platform" [label="templates-platform" shape=folder fillcolor="#fef3c7"];
   "repo:templates-shared" [label="templates-shared" shape=folder fillcolor="#fef3c7"];
@@ -93,8 +94,8 @@ digraph PSAzureDevOpsGraph {
   "yaml:pipelines-main/pipelines/p07b.yml" -> "yaml:pipelines-main/pipelines/templates/diamond-shared.yml" [label="template"];
   "yaml:pipelines-main/pipelines/p08.yml" -> "yaml:pipelines-main/pipelines/templates/cycle-a.yml" [label="template"];
   "yaml:pipelines-main/pipelines/p09.yml" -> "repo:templates-shared" [label="repositoryResource"];
-  "yaml:pipelines-main/pipelines/p09.yml" -> "yaml:@ghostTemplates/steps/common.yml" [label="template: alias-not-declared" style=dashed color="#b91c1c"];
-  "yaml:pipelines-main/pipelines/p09.yml" -> "yaml:pipelines-main/pipelines/templates/missing-steps.yml" [label="template: file-not-found" style=dashed color="#b91c1c"];
+  "yaml:pipelines-main/pipelines/p09.yml" -> "yaml:@ghostTemplates/steps/common.yml" [label="template: alias-not-declared: 'ghostTemplates' is not in resources.repositories of pipelines/p09.yml, so the repository is unknown and the path cannot be resolved at all" style=dashed color="#b91c1c"];
+  "yaml:pipelines-main/pipelines/p09.yml" -> "yaml:pipelines-main/pipelines/templates/missing-steps.yml" [label="template: file-not-found: resolved to pipelines/templates/missing-steps.yml in pipelines-main, which does not exist" style=dashed color="#b91c1c"];
   "yaml:pipelines-main/pipelines/templates/chain-a.yml" -> "yaml:pipelines-main/pipelines/templates/chain-b.yml" [label="template"];
   "yaml:pipelines-main/pipelines/templates/chain-b.yml" -> "yaml:pipelines-main/pipelines/templates/chain-c.yml" [label="template"];
   "yaml:pipelines-main/pipelines/templates/cycle-a.yml" -> "yaml:pipelines-main/pipelines/templates/cycle-b.yml" [label="template"];

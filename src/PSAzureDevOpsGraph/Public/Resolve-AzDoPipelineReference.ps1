@@ -84,6 +84,7 @@ function Resolve-AzDoPipelineReference {
             Path        = $null
             Name        = $null
             Reason      = $null
+            ReasonCode  = $null
         }
 
         switch ($Reference.RefKind) {
@@ -97,7 +98,10 @@ function Resolve-AzDoPipelineReference {
                 $result.TargetKind = 'pipeline'
                 $result.Name = $Reference.Target
                 $result.Resolved = [bool] $Reference.Target
-                if (-not $result.Resolved) { $result.Reason = 'alias-not-declared' }
+                if (-not $result.Resolved) {
+                    $result.ReasonCode = 'alias-not-declared'
+                    $result.Reason = "alias-not-declared: the pipeline resource '$($Reference.Alias)' in $SourcePath names no source definition"
+                }
             }
             'checkout' {
                 $result.TargetKind = 'repo'
@@ -106,7 +110,8 @@ function Resolve-AzDoPipelineReference {
                     $result.Name = $result.Repository
                     $result.Resolved = $true
                 } else {
-                    $result.Reason = 'alias-not-declared'
+                    $result.ReasonCode = 'alias-not-declared'
+                    $result.Reason = "alias-not-declared: '$($Reference.Alias)' is not in resources.repositories of $SourcePath, so the repository being checked out is unknown"
                 }
             }
             default {
@@ -115,8 +120,13 @@ function Resolve-AzDoPipelineReference {
 
                 if ($Reference.Alias -and -not $aliases.ContainsKey($Reference.Alias)) {
                     # An undeclared alias is not a missing file. It is a missing
-                    # resources.repositories entry, and the fixes differ.
-                    $result.Reason = 'alias-not-declared'
+                    # resources.repositories entry, and the fixes differ. The
+                    # reason keeps the code as a prefix so it stays machine-
+                    # readable, and then says WHICH alias, in WHICH file, and
+                    # what follows from that -- a bare code makes a reader open
+                    # the YAML to learn anything at all.
+                    $result.ReasonCode = 'alias-not-declared'
+                    $result.Reason = "alias-not-declared: '$($Reference.Alias)' is not in resources.repositories of $SourcePath, so the repository is unknown and the path cannot be resolved at all"
                 } else {
                     if ($Reference.Alias) {
                         # From the ROOT of the aliased repository.
@@ -135,7 +145,11 @@ function Resolve-AzDoPipelineReference {
                             $result.Path = ($canonical[$key] -split '/', 2)[1]
                             $result.Resolved = $true
                         } else {
-                            $result.Reason = 'file-not-found'
+                            # Says where it resolved TO, which is the fact that
+                            # distinguishes "the file is missing" from "the rule
+                            # sent me to the wrong place".
+                            $result.ReasonCode = 'file-not-found'
+                            $result.Reason = "file-not-found: resolved to $($result.Path) in $($result.Repository), which does not exist"
                         }
                     } else {
                         $result.Resolved = $true

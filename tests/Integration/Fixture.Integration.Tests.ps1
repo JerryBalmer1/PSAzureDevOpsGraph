@@ -77,15 +77,23 @@ Describe 'Against the live fixture' -Tag 'Integration', 'RequiresPat' -Skip:(-no
         @($incoming.Values | Where-Object { $_ -gt 1 }).Count | Should-BeGreaterThan 0
     }
 
-    It 'emits no repository node for a repository nothing references' {
-        # Repository nodes come from resources.repositories and checkout, never
-        # from the repositories endpoint.
+    It 'emits a repository node only where a pipeline justifies one' {
+        # Either something references it through resources.repositories or
+        # checkout, or it hosts a definition. Never because the project contains
+        # it -- that would answer "what is in this project" instead.
         $referenced = @($script:Graph.edges |
                 Where-Object { $_.kind -in 'repositoryResource', 'checkout' } |
                 ForEach-Object { $_.to })
+        $hosting = @($script:Graph.nodes | Where-Object kind -eq 'pipeline' | ForEach-Object { "repo:$($_.repo)" })
         foreach ($node in @($script:Graph.nodes | Where-Object kind -eq 'repo')) {
-            $referenced | Should-ContainCollection $node.id
+            ($referenced + $hosting) | Should-ContainCollection $node.id
         }
+    }
+
+    It 'emits no node for the project repository that no pipeline touches' {
+        # It really is there, in the same project, visible to any call that
+        # lists repositories. An implementation has to NOT use it.
+        @($script:Graph.nodes.id) | Should-NotContainCollection 'repo:ClaudeTesting'
     }
 
     It 'carries a ref on every edge except definition edges' {
@@ -106,9 +114,26 @@ Describe 'Against the live fixture' -Tag 'Integration', 'RequiresPat' -Skip:(-no
         # file-not-found and alias-not-declared need different fixes, so
         # reporting both as "not found" tells the reader nothing.
         foreach ($edge in @($script:Graph.edges | Where-Object kind -eq 'unresolved')) {
-            @('file-not-found', 'alias-not-declared') | Should-ContainCollection $edge.reason
+            # The code is a prefix so it stays machine-readable, and what follows
+            # says which alias or which path, so a reader need not open the YAML.
+            $edge.reason | Should-MatchString '^(file-not-found|alias-not-declared): \S'
             $edge.ref | Should-NotBeNull
             $edge.refKind | Should-NotBeNull
+        }
+    }
+
+    It 'keeps the alias in the target id rather than guessing a repository' {
+        # An unresolved target must not collide with a real node, and for an
+        # undeclared alias the repository is genuinely unknown.
+        foreach ($edge in @($script:Graph.edges | Where-Object { $_.kind -eq 'unresolved' -and $_.reason -like 'alias-not-declared*' })) {
+            $edge.to | Should-MatchString '^yaml:@\S'
+        }
+    }
+
+    It 'gives every unresolved target an id that is not a real node' {
+        $ids = @($script:Graph.nodes.id)
+        foreach ($edge in @($script:Graph.edges | Where-Object kind -eq 'unresolved')) {
+            $ids | Should-NotContainCollection $edge.to
         }
     }
 
