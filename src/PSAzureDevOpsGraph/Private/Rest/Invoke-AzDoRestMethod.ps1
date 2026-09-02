@@ -46,8 +46,15 @@ function Invoke-AzDoRestMethod {
         if ($token) { $pairs += "continuationToken=$([uri]::EscapeDataString($token))" }
         $full = if ($pairs.Count) { "$Uri`?$($pairs -join '&')" } else { $Uri }
 
+        # OUTSIDE the try. Built inside it, the "AZDO_PAT is not set" throw is
+        # caught by the handler below and rewritten as an HTTP status that is not
+        # there -- so the one error that names the fix gets replaced by one that
+        # names nothing. The missing-credential failure is not a transport
+        # failure and must not be handled as one.
+        $headers = Get-AzDoAuthHeader
+
         try {
-            $response = Invoke-WebRequest -Uri $full -Headers (Get-AzDoAuthHeader) -Method Get -MaximumRedirection 0 -ErrorAction Stop
+            $response = Invoke-WebRequest -Uri $full -Headers $headers -Method Get -MaximumRedirection 0 -ErrorAction Stop
         } catch {
             $status = $_.Exception.Response.StatusCode.value__
 

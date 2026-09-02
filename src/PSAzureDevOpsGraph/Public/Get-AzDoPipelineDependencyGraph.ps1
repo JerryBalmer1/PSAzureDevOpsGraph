@@ -68,7 +68,7 @@ function Get-AzDoPipelineDependencyGraph {
         $nodes = @{}
         $edges = [System.Collections.Generic.List[object]]::new()
         $visited = [System.Collections.Generic.HashSet[string]]::new()
-        $cycles = [System.Collections.Generic.List[string]]::new()
+
         $queue = [System.Collections.Generic.Queue[object]]::new()
 
         $addNode = {
@@ -197,19 +197,22 @@ function Get-AzDoPipelineDependencyGraph {
 
                         if ($visited.Add($targetId)) {
                             $queue.Enqueue([pscustomobject]@{ Id = $targetId; Repository = $resolution.Repository; Path = $resolution.Path })
-                        } else {
-                            $cycles.Add("$($file.Id) -> $targetId")
                         }
                     }
                 }
             }
         }
 
+        # A cycle that terminates silently is indistinguishable from no cycle, so
+        # the cycles are reported. They are found from the ASSEMBLED EDGES rather
+        # than from arrivals during the walk: an arrival at an already-visited
+        # node is usually a diamond, and calling that a cycle is the same defect
+        # as reporting none, in the other direction. Both edges of a real cycle
+        # are in the graph -- the traversal declined to descend, it did not drop
+        # the edge that closes it.
+        $cycles = @(Find-AzDoGraphCycle -Edge @($edges))
         if ($cycles.Count) {
-            # A cycle that terminates silently is indistinguishable from no
-            # cycle. These are back edges into an already-visited node; they are
-            # in the graph, and the traversal declined only to descend.
-            Write-Warning "Back edge(s) into already-visited nodes: $($cycles -join '; ')"
+            Write-Warning "Dependency cycle(s) found: $($cycles -join '; ')"
         }
 
         # Sorted, so two runs of the same project diff to nothing. A comparator

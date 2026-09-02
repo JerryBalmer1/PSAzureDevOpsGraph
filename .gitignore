@@ -3,3 +3,5 @@ output/
 **/pat.txt
 *.token
 .vscode/
+coverage.xml
+graph-live.json

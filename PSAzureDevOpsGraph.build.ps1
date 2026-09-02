@@ -70,10 +70,12 @@ function Resolve-BuildDependency {
         }
     }
 
-    # Print the resolved version, so the fact sits next to the failure rather
-    # than three tasks away from it.
-    Write-Build Green "  ${Name}: $found at $resolved"
-    $resolved
+    # RETURNS the facts; it does not print them. A function that both writes a
+    # message and returns a value puts both in the output stream, and the
+    # caller's "$null = ..." then swallows the message along with the value --
+    # so the resolved version silently stops being printed while the build still
+    # passes. The caller prints.
+    [pscustomobject]@{ Name = $Name; Version = $found; Path = $resolved }
 }
 
 task Clean {
@@ -94,7 +96,11 @@ task Lint {
 
 task Resolve {
     Write-Build Gray 'Runtime dependencies:'
-    $null = Resolve-BuildDependency -Name 'powershell-yaml' -ManifestPath $script:Manifest
+    $dependency = Resolve-BuildDependency -Name 'powershell-yaml' -ManifestPath $script:Manifest
+    # Printed out loud, so the version actually used sits next to any failure
+    # rather than three tasks away from it. RequiredModules with ModuleVersion is
+    # a FLOOR, so the version tested against and the version used are two facts.
+    Write-Build Green "  $($dependency.Name): $($dependency.Version) at $($dependency.Path)"
 }
 
 task Build Resolve, {
@@ -147,6 +153,11 @@ task Test Build, {
     $cfg = New-PesterConfiguration
     $cfg.Run.Path = "$BuildRoot/tests"
     $cfg.Run.Throw = $true                      # NOT Run.Exit - that kills the host process.
+    # PassThru, or Invoke-Pester returns NOTHING and every gate written against
+    # the result silently cannot fire: $percent reads 0, $target reads $null,
+    # and "0 -lt $null" is false, so the coverage throw below is unreachable
+    # while looking exactly like a working gate.
+    $cfg.Run.PassThru = $true
     $cfg.Run.FailOnNullOrEmptyForEach = $false  # An empty -ForEach is inapplicable, not fatal.
     $cfg.Should.DisableV5 = $true
     $cfg.Filter.ExcludeTag = 'PreTag'
@@ -172,6 +183,7 @@ task PreTag Build, {
     $cfg = New-PesterConfiguration
     $cfg.Run.Path = "$BuildRoot/tests"
     $cfg.Run.Throw = $true
+    $cfg.Run.PassThru = $true    # Without it the guard below reads $null and always throws.
     $cfg.Should.DisableV5 = $true
     $cfg.Filter.Tag = 'PreTag'
     $result = Invoke-Pester -Configuration $cfg

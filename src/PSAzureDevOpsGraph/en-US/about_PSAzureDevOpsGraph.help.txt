@@ -1,0 +1,145 @@
+TOPIC
+    about_PSAzureDevOpsGraph
+
+SHORT DESCRIPTION
+    Produces a dependency graph of Azure DevOps pipelines and the repositories
+    and templates they reference. Read-only.
+
+LONG DESCRIPTION
+    Azure DevOps pipeline YAML composes by reference. A pipeline pulls in
+    templates, those templates pull in other templates, and the references cross
+    repository boundaries. None of it is visible from any one file, so the
+    question nobody can answer by reading a repository is:
+
+        if I change this template, which pipelines break?
+
+    This module answers it as data. Point it at a project and it returns nodes
+    and edges: the pipeline definitions, the YAML files they reference, the
+    repositories those files live in, and the references it could NOT resolve.
+
+CONCEPTS
+
+  Node identity
+    A node is what it is, not where a traversal reached it. Three id shapes:
+
+        pipeline:<definition name>
+        yaml:<repo>/<path within repo>
+        repo:<repository name>
+
+    A template two pipelines include is ONE node with in-degree two. That is the
+    point of the structure: fan-in is the answer to "how many pipelines would
+    this change break".
+
+  What is a node, and what is not
+    The node set is seeded from the pipeline DEFINITION list, so a pipeline that
+    references nothing and that nothing references still appears. It is the one
+    a reader may most want to find, and a graph built only from edges would make
+    it vanish -- an absence that looks exactly like a correct answer.
+
+    A repository that nothing references is NOT in the graph. Repository nodes
+    come from resources.repositories and checkout only. The repositories
+    endpoint is used to look files up, never to emit nodes; a graph that lists
+    every repository answers "what is in this project" instead.
+
+  The two resolution rules
+    These produce different files from the same reference text.
+
+    WITHOUT an @alias, a reference resolves relative to the DIRECTORY of the
+    file making it:
+
+        file  repos/pipelines-main/pipelines/p01.yml
+        ref   templates/steps-build.yml
+        ->    repos/pipelines-main/pipelines/templates/steps-build.yml
+
+    WITH an @alias, it resolves from the ROOT of the aliased repository, and the
+    alias is looked up in the resources.repositories of the file making the
+    reference:
+
+        file  repos/consumer-app/azure-pipelines.yml
+        ref   templates/steps-build.yml@mainPipelines
+        ->    repos/pipelines-main/templates/steps-build.yml
+
+    A repository can hold both of those files. A resolver that uses the wrong
+    rule does not error; it returns the other file, confidently.
+
+    The current repository is a property of the FILE, not of the traversal. A
+    relative reference inside a cross-repository template stays in that
+    template's repository.
+
+  Unresolved references are results
+    A reference that goes nowhere is never dropped. A broken pipeline would then
+    look identical to a clean one, and the tool would be worst exactly where it
+    is most useful.
+
+    Two reasons, kept apart because they need different fixes:
+
+        file-not-found       the alias resolved (or none was used) but no such
+                             file exists -- add the file
+        alias-not-declared   the @alias has no resources.repositories entry --
+                             add the entry
+
+    An unresolved edge's target never collides with a real node. For an
+    undeclared alias the repository is unknown and is not guessed: the alias
+    stays in the id, as yaml:@ghostTemplates/steps/common.yml.
+
+  Cycles
+    A template that includes a template that includes the first one is a cycle.
+    Both edges appear in the graph, the walk terminates, and the cycle is
+    reported as a warning. A revisit is NOT a cycle: two pipelines including one
+    shared template arrive at it twice, and calling that a cycle is the same
+    defect as reporting none.
+
+CREDENTIALS
+    A personal access token in the environment variable AZDO_PAT, and nothing
+    else. It needs Code (Read) and Build (Read) scope.
+
+        $env:AZDO_PAT = '<token>'
+
+    Not a parameter. Not a file. Not in a URL. A value passed as a parameter
+    ends up in PSReadLine history, in Start-Transcript output and in the
+    ScriptBlock logging event log, and the token is a bearer credential for an
+    entire organisation.
+
+    When the variable is absent, commands fail with a message naming it. They do
+    not prompt, do not search for a file, and do not continue anonymously.
+
+WHAT IT WILL NOT DO
+    Read-only, permanently, and not behind a switch:
+
+      - It never queues, runs or triggers a pipeline.
+      - It never creates, updates or deletes anything in Azure DevOps.
+      - No exported command is named with a writing verb.
+
+    There is no -Force that changes any of this. A tool that walks an
+    organisation's pipelines is exactly the kind of thing that gets run with a
+    high-privilege token, which is the reason for the constraint rather than an
+    exception to it.
+
+A WORKED SEQUENCE
+    Substitute your own organisation and project.
+
+        $env:AZDO_PAT = '<token with Code (Read) and Build (Read)>'
+
+        $graph = Get-AzDoPipelineDependencyGraph -Organisation contoso -Project platform
+
+        # What could not be resolved, and why
+        $graph.edges | Where-Object kind -eq 'unresolved' |
+            Format-Table from, ref, refKind, reason
+
+        # Which pipelines reach a given template
+        $graph.edges | Where-Object to -eq 'yaml:pipelines-main/templates/steps-build.yml'
+
+        $graph | Export-AzDoPipelineDependencyGraph -Format Html -Path ./graph.html
+
+    Parsing needs no credential at all:
+
+        Get-AzDoPipelineReference -Path ./azure-pipelines.yml
+
+SEE ALSO
+    Get-AzDoRepository
+    Get-AzDoPipeline
+    Get-AzDoPipelineYaml
+    Get-AzDoPipelineReference
+    Resolve-AzDoPipelineReference
+    Get-AzDoPipelineDependencyGraph
+    Export-AzDoPipelineDependencyGraph
