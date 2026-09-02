@@ -136,16 +136,22 @@ task Test {
     $config.TestResult.Enabled    = $true
     $config.TestResult.OutputPath = "$script:Results/pester.xml"
 
-    $result = Invoke-Pester -Configuration $config
+    # Throw, never exit. An exit here would take the whole build host with it and
+    # skip every task after this one, including anything that cleans up; a
+    # terminating error unwinds to Invoke-Build, which reports which task failed.
+    $config.Run.Throw = $true
 
-    # Throw, never exit: an exit here would take the whole build host with it and
-    # skip every task after this one, including anything that cleans up.
+    $result = Invoke-Pester -Configuration $config
     if ($result.FailedCount -gt 0) { throw "$($result.FailedCount) test(s) failed." }
 
+    # The target is read back off the configuration rather than from $CoverageTarget
+    # a second time, so that the number the run was measured against and the number
+    # it is judged against cannot drift apart.
     $covered = [math]::Round($result.CodeCoverage.CoveragePercent, 2)
-    Write-Host "    coverage: $covered% (target $CoverageTarget%)"
-    if ($covered -lt $CoverageTarget) {
-        throw "Coverage $covered% is below the target of $CoverageTarget%."
+    $target  = $config.CodeCoverage.CoveragePercentTarget.Value
+    Write-Host "    coverage: $covered% (target $target%)"
+    if ($covered -lt $target) {
+        throw "Coverage $covered% is below the target of $target%."
     }
 }
 
