@@ -121,18 +121,24 @@ $(($Graph.edges | ForEach-Object {
         }
 
         if ($Path) {
-            $directory = Split-Path -Parent $Path
+            # Resolve against the session's location, not the process working
+            # directory, which PowerShell does not keep in step with Set-Location.
+            # An already-rooted path is taken as given: joining it to the current
+            # location would produce 'C:\here\C:\there'.
+            $full = if ([System.IO.Path]::IsPathRooted($Path)) { $Path }
+                    else { Join-Path (Get-Location).ProviderPath $Path }
+            $full = [System.IO.Path]::GetFullPath($full)
+
+            $directory = Split-Path -Parent $full
             if ($directory -and -not (Test-Path -LiteralPath $directory)) {
                 $null = New-Item -ItemType Directory -Path $directory -Force
             }
+
             # UTF-8 without BOM and LF endings: the JSON is committed and diffed.
             $content = $text -replace "`r`n", "`n"
             if ($Format -eq 'Json' -and -not $content.EndsWith("`n")) { $content += "`n" }
-            [System.IO.File]::WriteAllText(
-                (Join-Path (Get-Location) $Path | ForEach-Object { [System.IO.Path]::GetFullPath($_) }),
-                $content,
-                [System.Text.UTF8Encoding]::new($false))
-            Write-Verbose "Wrote $Format to $Path"
+            [System.IO.File]::WriteAllText($full, $content, [System.Text.UTF8Encoding]::new($false))
+            Write-Verbose "Wrote $Format to $full"
         }
         else { $text }
     }

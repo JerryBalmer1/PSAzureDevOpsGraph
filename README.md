@@ -124,11 +124,23 @@ repeated on edges that merely use one; the use is already in `ref`.
 ## Build
 
 ```powershell
-./build.ps1            # clean, stage to output/, run tests
+./build.ps1                  # Clean, Lint, Build, Test
 ./build.ps1 -Task Test
+./build.ps1 -Task PreTag     # everything, plus the pre-tag checks
+./build.ps1 -Bootstrap       # install the pinned build dependencies first
 ```
 
-The test suite needs no credentials and makes no network calls.
+Tasks live in `PSAzureDevOpsGraph.build.ps1` (Invoke-Build); `build.ps1` is a
+bootstrap so that a fresh clone needs one command and no prior knowledge. Build
+dependencies are pinned in `Requirements.psd1` and nowhere else.
+
+The module ships as **one generated `.psm1`**, assembled from `src/` into
+`output/` by the Build task. It is never edited and never committed — `src/` is
+the source of truth. Coverage is measured against that generated file, because
+it is what actually ships; the Test task throws below 70%.
+
+The test suite needs no credentials and makes no network calls: the transport is
+mocked at `Invoke-AzDoRestMethod`, the single point every request goes through.
 
 ## Licence
 
