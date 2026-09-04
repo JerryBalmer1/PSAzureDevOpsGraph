@@ -2,6 +2,37 @@
 
 **Read this first.**
 
+## State, as of pass 0043
+
+**Where it is.** `v0.4.0`, tagged by this pass under decision 0006, with
+[`docs/worklog/v0.4.0.md`](worklog/v0.4.0.md) beside it. The minor was taken
+from this repository's `git tag` list and the harness LEDGER version line,
+which agreed on `v0.3.0` as the frontier.
+
+**What pass 0043 did here.** Documentation and generated artifacts only. **No
+`src/` file changed.** `examples/` holds the ClaudeTesting fixture as the
+module reads it — 51 nodes, 51 edges — as committed graph JSON, rendered HTML
+and a 1600x900 screenshot that is now the README's hero image. Generating it
+issued `GET` requests only; no pipeline was queued, run or triggered.
+
+**The mapping is in the example, not in the module.** This module emits its own
+graph shape and does not depend on the render stack. `examples/Build-Examples.ps1`
+maps that shape onto PSGraphRenderToHtml's producer contract, and the dependency
+still points one way.
+
+**Known drift, recorded not repaired.**
+`src/PSAzureDevOpsGraph/PSAzureDevOpsGraph.psd1` declares
+`ModuleVersion = '0.1.0'` while the tag line has reached `v0.4.0`. The two have
+been diverging since the tag line started moving on docs-only minors, and
+nothing compares them: the `PreTag` task filters on a `PreTag` Pester tag that
+no test in `tests/` carries, so `./build.ps1 -Task PreTag` currently runs zero
+tests and passes. Both facts predate this pass and neither was touched by it —
+a pass that changes `src/` is the right place to decide whether the manifest
+should track the tag, and whether a gate that asserts nothing should exist.
+
+**Next.** Nothing here is blocked. The two drift items above want a decision
+before code moves.
+
 ## What this is
 
 Reads an Azure DevOps project through the REST API and returns the whole

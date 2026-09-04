@@ -1,6 +1,33 @@
 # PSAzureDevOpsGraph
 
+[![Module 0.4.0](https://img.shields.io/badge/module-0.4.0-blue)](docs/worklog/v0.4.0.md)
+[![Read only](https://img.shields.io/badge/access-read--only-00a884)](#read-only-permanently)
+[![PowerShell 7+](https://img.shields.io/badge/PowerShell-7%2B-5391FE)](src/PSAzureDevOpsGraph/PSAzureDevOpsGraph.psd1)
+[![Licence MIT](https://img.shields.io/badge/licence-MIT-lightgrey)](LICENSE)
+
 Works out which Azure DevOps pipelines depend on what.
+
+![The ClaudeTesting project: 51 nodes, 51 edges](examples/claudetesting.png)
+
+<sup>A real project — 15 pipelines, 30 YAML files, 4 repositories. The two
+orange nodes are references that resolve to nothing; the sidebar names the four
+nodes stuck in a dependency cycle. Open
+[the report](examples/claudetesting.html).</sup>
+
+## Examples
+
+| Example | What it shows | Artifacts | Regenerate |
+| --- | --- | --- | --- |
+| **ClaudeTesting** | 51 nodes and 51 edges across one project, including two unresolved template references and a four-node dependency cycle. | [html](examples/claudetesting.html) · [graph json](examples/input/claudetesting-graph.json) · [png](examples/claudetesting.png) | `pwsh -NoProfile -File examples/Build-Examples.ps1` |
+
+That command reads the live project, so it needs `$env:AZDO_PAT` to hold a
+token with **Code (Read)** and **Build (Read)** — read from the environment by
+name, never written anywhere. Without a token, rebuild the HTML from the
+committed graph with `pwsh -NoProfile -File examples/Build-Examples.ps1
+-Offline`: no network, same output.
+
+See [`examples/README.md`](examples/README.md) for the full index, what each
+colour means, and why unresolved references are carried rather than dropped.
 
 ## The question it answers
 
@@ -45,7 +72,7 @@ $env:AZDO_PAT = '<paste your token here, in your own shell>'
 Not published to the PowerShell Gallery. Clone a tag and build it:
 
 ```powershell
-git clone --branch v0.3.0 https://github.com/JerryBalmer1/PSAzureDevOpsGraph.git
+git clone --branch v0.4.0 https://github.com/JerryBalmer1/PSAzureDevOpsGraph.git
 cd PSAzureDevOpsGraph
 Install-Module powershell-yaml -Scope CurrentUser   # the one runtime dependency
 ./build.ps1                                          # Clean, Lint, Build, Test
@@ -71,7 +98,7 @@ $graph = Get-AzDoPipelineDependencyGraph -Organisation myorg -Project MyProject
 $graph.nodes | Group-Object kind | Select-Object Count, Name
 ```
 
-```
+```text
 Count Name
 ----- ----
    15 pipeline
@@ -92,7 +119,7 @@ identical to a clean one.
 $graph.edges | Where-Object kind -eq 'unresolved' | Format-List from, ref, reason
 ```
 
-```
+```text
 from   : yaml:pipelines-main/pipelines/p09.yml
 ref    : steps/common.yml@ghostTemplates
 reason : alias-not-declared: 'ghostTemplates' is not in resources.repositories of
@@ -115,7 +142,7 @@ $target = 'yaml:pipelines-main/pipelines/templates/steps-build.yml'
 $graph.edges | Where-Object to -eq $target | Select-Object from, kind, ref
 ```
 
-```
+```text
 from                                  kind     ref
 ----                                  ----     ---
 yaml:pipelines-main/pipelines/p01.yml template templates/steps-build.yml
